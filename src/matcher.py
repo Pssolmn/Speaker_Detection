@@ -1,3 +1,9 @@
+"""Reusable baseline matcher for L1-normalized hair-colour features.
+
+The future visual_matcher module can call this code as one component of a wider
+identity score; this module alone must not decide who is speaking.
+"""
+
 import cv2
 import numpy as np
 
@@ -9,7 +15,16 @@ def calculate_histogram_similarity(hist_a, hist_b):
     if hist_a is None or hist_b is None:
         return 0.0
     
-    # ใช้ฟังก์ชันเปรียบเทียบ Histogram ของ OpenCV
+    hist_a = np.asarray(hist_a, dtype=np.float32)
+    hist_b = np.asarray(hist_b, dtype=np.float32)
+    total_a = float(hist_a.sum())
+    total_b = float(hist_b.sum())
+    if total_a <= 0 or total_b <= 0:
+        return 0.0
+
+    # Normalise defensively so Intersection remains in the documented 0.0–1.0 range.
+    hist_a = hist_a / total_a
+    hist_b = hist_b / total_b
     similarity = cv2.compareHist(hist_a, hist_b, cv2.HISTCMP_INTERSECT)
     
     # บังคับช่วงค่าให้อยู่ระหว่าง 0.0 ถึง 1.0

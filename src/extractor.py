@@ -1,26 +1,40 @@
+"""Reusable baseline hair-colour feature extractor.
+
+This module remains useful for reference portraits and per-character hair ROIs.
+It must not receive a whole video frame; the future pipeline obtains one ROI from
+vision/hair_roi.py before calling these functions.
+"""
+
 import cv2
 import numpy as np
 from sklearn.cluster import KMeans
 
-def crop_hair_roi(image, bbox = None, face_mask=None, hair_mask=None):
+
+def crop_hair_roi(image, bbox=None, hair_mask=None):
     """
     Crop the region of interest (ROI) containing hair from the input image using the provided hair mask.
 
     Parameters:
         image (numpy.ndarray): The input image from which to crop the hair ROI.
         bbox (tuple): The bounding box coordinates (x, y, w, h) for the region of interest.
-        face_mask (numpy.ndarray, optional): A binary mask indicating the face region.
-
         hair_mask (numpy.ndarray, optional): A binary mask indicating the hair region.
     
     Outputs:
         numpy.ndarray: The cropped hair ROI image.
     """
+    # Legacy signature intentionally retired: face_mask was accepted but never used.
+    # def crop_hair_roi(image, bbox=None, face_mask=None, hair_mask=None):
+    if image is None or image.size == 0:
+        raise ValueError("Image is empty.")
+
     img_height, img_width = image.shape[:2]
 
     # กรณีที่ 1: มี hair_mask ส่งเข้ามา (วิธีของคุณ: แม่นยำที่สุดระดับพิกเซล)
     if hair_mask is not None:
-        # Ensure the hair mask is binary
+        if hair_mask.shape[:2] != image.shape[:2]:
+            raise ValueError("Hair mask dimensions must match the image dimensions.")
+
+        # Ensure the hair mask is binary.
         hair_mask_bin = (hair_mask > 0).astype(np.uint8)
         x, y, w, h = cv2.boundingRect(hair_mask_bin)
 
@@ -45,7 +59,7 @@ def crop_hair_roi(image, bbox = None, face_mask=None, hair_mask=None):
         return hair_roi
     # กรณีที่ 3: ไม่มีทั้ง Mask และ Bbox (เป็นภาพพอร์ตเทรตที่ครอปส่วนหัวมาแล้ว)
     else:
-        # ตัดเอาพื้นที่ครึ่งบน (45%) ของภาพไปใช้งาน
+        # This fallback is valid only for a reference portrait already cropped around one head.
         return image[0:int(img_height * 0.45), 0:img_width]
 
 
@@ -75,11 +89,11 @@ def extract_dominant_hair_color(hsv_roi, mask, k=3):
     valid_pixels = hsv_roi[mask]
 
     if len(valid_pixels) == 0:
-        raise ValueError("No valid hair pixels found for color extraction.")
-    elif len(valid_pixels) < 10:
-        return np.array([0.0, 0.0, 0.0])  # Return black if not enough valid pixels
+        return None
 
-    kmeans = KMeans(n_clusters=k, random_state=42, n_init=5)
+    # A tiny or single-colour ROI should use fewer clusters, never a fabricated black colour.
+    distinct_colours = len(np.unique(valid_pixels, axis=0))
+    kmeans = KMeans(n_clusters=min(k, len(valid_pixels), distinct_colours), random_state=42, n_init=5)
     kmeans.fit(valid_pixels)
 
     count = np.bincount(kmeans.labels_)
@@ -94,6 +108,9 @@ def extract_color_histogram(hsv_roi, mask, h_bins=30, s_bins=32):
     # แปลง mask เป็น uint8 เพื่อให้ OpenCV ใช้งานได้ (255 = จุดที่คิด, 0 = จุดที่ตัดทิ้ง)
     cv_mask = (mask.astype(np.uint8)) * 255
     
+    if not np.any(mask):
+        return None
+
     # คำนวณ 2D Histogram: แกน H (0-180), แกน S (0-256)
     hist = cv2.calcHist(
         [hsv_roi], 
@@ -103,17 +120,20 @@ def extract_color_histogram(hsv_roi, mask, h_bins=30, s_bins=32):
         ranges=[0, 180, 0, 256]
     )
     
-    # Normalize ให้ผลรวมของพิกเซลในตารางเท่ากับ 1.0 เพื่อให้เปรียบเทียบข้ามภาพที่มีขนาดต่างกันได้
-    hist = cv2.normalize(hist, hist, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX)
+    # L1 normalization makes Histogram Intersection a score that is comparable across ROI sizes.
+    hist = cv2.normalize(hist, None, alpha=1.0, beta=0.0, norm_type=cv2.NORM_L1)
     
     return hist
 
-def extract_character_features(image, bbox=None):
+def extract_character_features(image, bbox=None, hair_mask=None):
     """
     ฟังก์ชันรวม (Wrapper): รับภาพเข้ามา -> ส่งคืนค่าความ Unique ครบชุด
     """
-    # 1. ตัดพื้นที่ผม
-    hair_roi = crop_hair_roi(image, bbox)
+    # 1. ตัดพื้นที่ผม. Without bbox/hair_mask, image must be a pre-cropped reference portrait.
+    try:
+        hair_roi = crop_hair_roi(image, bbox=bbox, hair_mask=hair_mask)
+    except ValueError:
+        return None
     if hair_roi.size == 0:
         return None
         
@@ -126,6 +146,8 @@ def extract_character_features(image, bbox=None):
     # 4. ดึงค่าสีเด่น และสร้าง Histogram
     dominant_color = extract_dominant_hair_color(hsv_roi, mask, k=3)
     color_hist = extract_color_histogram(hsv_roi, mask)
+    if dominant_color is None or color_hist is None:
+        return None
     
     return {
         "dominant_hsv": dominant_color.tolist(),

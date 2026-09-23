@@ -314,16 +314,30 @@ class SubtitleEditStudio(QMainWindow):
         """Reserved for a real SRT/JSON parser in src/io/subtitle_io.py."""
 
         # Disabled legacy sample data: it made the Import action look successful without reading a file.
+        # if not self.video_path:
+        #     QMessageBox.warning(self, "แจ้งเตือน", "กรุณาเปิดไฟล์วิดีโอก่อนนำเข้าช่วงบทพูด")
+        #     return
         # sample_intervals = [
         #     {"start": 1000, "end": 4000, "char": "Unknown", "text": "สวัสดีครับทุกคน"},
         #     {"start": 5500, "end": 8500, "char": "Unknown", "text": "วันนี้เราจะมาคุยเรื่องงานกัน"},
         #     {"start": 10000, "end": 14000, "char": "Unknown", "text": "เตรียมตัวให้พร้อมสำหรับการทดสอบ"},
         # ]
         # self.sub_table.setRowCount(0)
+        # regions = []
+        # palette = [QColor(255, 82, 82, 90), QColor(105, 240, 174, 90), QColor(255, 215, 64, 90)]
         # for i, item in enumerate(sample_intervals):
         #     self.sub_table.insertRow(i)
+        #     dur = (item["end"] - item["start"]) / 1000.0
+        #     self.sub_table.setItem(i, 0, QTableWidgetItem(str(i + 1)))
+        #     self.sub_table.setItem(i, 1, QTableWidgetItem(self.format_ms(item["start"])))
+        #     self.sub_table.setItem(i, 2, QTableWidgetItem(self.format_ms(item["end"])))
+        #     self.sub_table.setItem(i, 3, QTableWidgetItem(f"{dur:.2f}s"))
         #     self.sub_table.setItem(i, 4, QTableWidgetItem(item["char"]))
         #     self.sub_table.setItem(i, 5, QTableWidgetItem(item["text"]))
+        #     color = palette[i % len(palette)]
+        #     regions.append((item["start"], item["end"], f"Line {i + 1}", color))
+        # self.waveform_widget.set_regions(regions)
+        # QMessageBox.information(self, "สำเร็จ", f"นำเข้าช่วงเวลาบทพูดเรียบร้อยแล้ว {len(sample_intervals)} บรรทัด")
 
         QMessageBox.information(
             self,
