@@ -1,4 +1,10 @@
-"""Module for parsing SRT subtitle files into SubtitleSegment models."""
+"""Module for parsing SRT subtitle files into SubtitleSegment models.
+    SRT: ✅
+    ASS / SSA: ❌
+    VTT: ❌
+    SUP / SUB + IDX: ❌
+
+"""
 
 import re
 from pathlib import Path
@@ -16,18 +22,38 @@ def time_to_ms(time_str: str) -> int:
     hours, minutes, seconds, milliseconds = map(int, match.groups())
     return (hours * 3600 * 1000) + (minutes * 60 * 1000) + (seconds * 1000) + milliseconds
 
-
 def extract_script_character(raw_text: str) -> tuple[Optional[str], str]:
-    """ตรวจสอบว่ามีชื่อตัวละครระบุไว้หน้าข้อความหรือไม่"""
-    pattern = r"^(?:\[(.*?)\]|(.*?)):\s*(.*)$"
-    match = re.match(pattern, raw_text, flags=re.DOTALL)
-    
-    if match:
-        char_bracket, char_plain, clean_text = match.groups()
-        char_name = char_bracket if char_bracket is not None else char_plain
-        return char_name.strip(), clean_text.strip()
-    
-    return None, raw_text.strip()
+    """
+    ตรวจสอบว่ามีชื่อตัวละครระบุไว้หน้าข้อความบรรทัดแรกหรือไม่
+    รองรับ: 'Saber: ข้อความ' หรือ '[Saber]: ข้อความ'
+    """
+    lines = [line.strip() for line in raw_text.splitlines() if line.strip()]
+    if not lines:
+        return None, ""
+
+    first_line = lines[0]
+
+    # รูปแบบที่ 1: มีวงเล็บก้ามปู เช่น [Saber]: ข้อความ หรือ [เมอซิเออร์กุสตาฟ]: ข้อความ
+    bracket_match = re.match(r"^\[([^\]]{1,30})\]\s*:\s*(.*)$", first_line)
+    if bracket_match:
+        char_name, first_line_clean = bracket_match.groups()
+        # นำข้อความบรรทัดแรกที่ตัดชื่อออกแล้ว มารวมกับบรรทัดที่เหลือ
+        remaining_lines = [first_line_clean] + lines[1:]
+        clean_text = "\n".join([line for line in remaining_lines if line])
+        return char_name.strip(), clean_text
+
+    # รูปแบบที่ 2: ไม่มีวงเล็บ เช่น Saber: ข้อความ (จำกัดความยาวชื่อไม่เกิน 30 ตัวอักษร)
+    plain_match = re.match(r"^([^:\n]{1,30})\s*:\s+(.*)$", first_line)
+    if plain_match:
+        char_name, first_line_clean = plain_match.groups()
+        # ป้องกันกรณีเป็น URL เช่น http: หรือคำที่ไม่ใช่ชื่อคน
+        if not char_name.lower().startswith(("http", "https")):
+            remaining_lines = [first_line_clean] + lines[1:]
+            clean_text = "\n".join([line for line in remaining_lines if line])
+            return char_name.strip(), clean_text
+
+    # กรณีไม่มีชื่อตัวละคร ให้คืนค่าข้อความทั้งหมดตามเดิม
+    return None, "\n".join(lines)
 
 
 def read_file_content_safely(file_path: Path) -> str:

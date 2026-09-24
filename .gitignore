@@ -181,4 +181,15 @@ cython_debug/
 .cursorindexingignore
 
 # Data
-data/
+# เมิน (Ignore) ไฟล์ทั้งหมดที่อยู่ในโฟลเดอร์ data/input/subtitles/ ยกเว้นไฟล์ .gitkeep
+data/input/subtitles/*
+!data/input/subtitles/.gitkeep
+
+# เมิน (Ignore) ไฟล์ทั้งหมดที่อยู่ในโฟลเดอร์ data/input/videos/ ยกเว้นไฟล์ .gitkeep
+data/input/videos/*
+!data/input/videos/.gitkeep
+
+# เมิน (Ignore) ไฟล์ทั้งหมดที่อยู่ในโฟลเดอร์ data/output/ ยกเว้นไฟล์ .gitkeep
+data/output/*
+!data/output/.gitkeep
+docs/
