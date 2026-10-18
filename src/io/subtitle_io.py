@@ -15,11 +15,13 @@ from src.core.models import SubtitleSegment
 def time_to_ms(time_str: str) -> int:
     """แปลงเวลาฟอร์แมต '00:01:05,500' หรือ '00:01:05.500' เป็น millisecond (int)"""
     time_str = time_str.strip().replace('.', ',')
-    match = re.match(r"^(\d{2}):(\d{2}):(\d{2}),(\d{3})$", time_str)
+    match = re.match(r"^(\d{2,}):(\d{2}):(\d{2}),(\d{3})$", time_str)
     if not match:
         raise ValueError(f"Invalid timestamp format: '{time_str}'")
     
     hours, minutes, seconds, milliseconds = map(int, match.groups())
+    if minutes >= 60 or seconds >= 60:
+        raise ValueError(f"Invalid minutes/seconds: '{time_str}'")
     return (hours * 3600 * 1000) + (minutes * 60 * 1000) + (seconds * 1000) + milliseconds
 
 def extract_script_character(raw_text: str) -> tuple[Optional[str], str]:
@@ -60,9 +62,11 @@ def read_file_content_safely(file_path: Path) -> str:
     """
     อ่านข้อความจากไฟล์โดยรองรับทั้ง UTF-8, CP874 (Windows Thai), และ TIS-620 อัตโนมัติ
     """
-    encodings_to_try = ["utf-8-sig", "cp874", "tis-620", "utf-16"]
-    
     raw_bytes = file_path.read_bytes()
+    # ตรวจ BOM ก่อน encoding แบบ single-byte ไม่เช่นนั้น UTF-16 อาจถูกอ่านเป็น CP874 ผิด ๆ
+    if raw_bytes.startswith((b"\xff\xfe", b"\xfe\xff")):
+        return raw_bytes.decode("utf-16").strip()
+    encodings_to_try = ["utf-8-sig", "cp874", "tis-620"]
     for enc in encodings_to_try:
         try:
             return raw_bytes.decode(enc).strip()
@@ -71,6 +75,14 @@ def read_file_content_safely(file_path: Path) -> str:
             
     # กรณีสุดวิสัย หากไม่ตรงกับมาตรฐานใดเลย ให้แทนที่ตัวอักษรที่เสียด้วย ? เพื่อไม่ให้โปรแกรมพัง
     return raw_bytes.decode("utf-8", errors="replace").strip()
+
+
+# จับจุดเริ่ม cue ด้วย "เลข ID ตามด้วยบรรทัดเวลา" แทนการมองหาบรรทัดว่างเพียงอย่างเดียว
+# เพราะบางไฟล์ (เช่นซับที่จำลองข้อความอีเมล/แชทเป็น cue เดียว) มีบรรทัดว่างแทรกอยู่กลางเนื้อข้อความของ cue เอง
+SEGMENT_HEADER_RE = re.compile(
+    r"(?m)^[ \t]*(\d+)[ \t]*\n"
+    r"[ \t]*(\d{2,}:\d{2}:\d{2}[,.]\d{3})[ \t]*-->[ \t]*(\d{2,}:\d{2}:\d{2}[,.]\d{3})[^\n]*\n"
+)
 
 
 def parse_srt(file_path: Path) -> List[SubtitleSegment]:
@@ -87,28 +99,31 @@ def parse_srt(file_path: Path) -> List[SubtitleSegment]:
     if not content:
         return []
 
-    blocks = re.split(r"\n\s*\n", content)
+    content = content.replace("\r\n", "\n").replace("\r", "\n")
+    matches = list(SEGMENT_HEADER_RE.finditer(content))
+    if not matches:
+        raise ValueError("No valid SRT blocks found")
+
+    leading_garbage = content[:matches[0].start()].strip()
+    if leading_garbage:
+        raise ValueError(f"Invalid SRT segment ID: {leading_garbage.splitlines()[0][:80]}")
+
     segments: List[SubtitleSegment] = []
+    seen_ids = set()
 
-    for block in blocks:
-        lines = [line.strip() for line in block.splitlines() if line.strip()]
-        if len(lines) < 2:
-            continue
+    for index, match in enumerate(matches):
+        segment_id = int(match.group(1))
+        if segment_id in seen_ids:
+            raise ValueError(f"Duplicate subtitle ID: {segment_id}")
+        seen_ids.add(segment_id)
 
-        try:
-            segment_id = int(lines[0])
-        except ValueError:
-            continue
+        start_ms = time_to_ms(match.group(2))
+        end_ms = time_to_ms(match.group(3))
 
-        time_match = re.match(r"^(.+?)\s*-->\s*(.+?)$", lines[1])
-        if not time_match:
-            continue
-
-        start_str, end_str = time_match.groups()
-        start_ms = time_to_ms(start_str)
-        end_ms = time_to_ms(end_str)
-
-        raw_text = "\n".join(lines[2:])
+        text_start = match.end()
+        text_end = matches[index + 1].start() if index + 1 < len(matches) else len(content)
+        # รวมบรรทัดข้อความของ cue เดียวกันเข้าด้วยกัน แม้มีบรรทัดว่างแทรกอยู่ภายใน
+        raw_text = "\n".join(line.strip() for line in content[text_start:text_end].splitlines() if line.strip())
         script_char, clean_text = extract_script_character(raw_text)
 
         segment = SubtitleSegment(

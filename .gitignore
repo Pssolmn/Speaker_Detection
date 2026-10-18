@@ -180,16 +180,59 @@ cython_debug/
 .cursorignore
 .cursorindexingignore
 
-# Data
-# เมิน (Ignore) ไฟล์ทั้งหมดที่อยู่ในโฟลเดอร์ data/input/subtitles/ ยกเว้นไฟล์ .gitkeep
+# macOS / editor noise
+.DS_Store
+.AppleDouble
+.LSOverride
+.idea/
+.vscode/
+
+# Data: keep only the directory placeholders in Git.
+# Input media and subtitle files are local test assets and can be very large.
 data/input/subtitles/*
 !data/input/subtitles/.gitkeep
 
-# เมิน (Ignore) ไฟล์ทั้งหมดที่อยู่ในโฟลเดอร์ data/input/videos/ ยกเว้นไฟล์ .gitkeep
 data/input/videos/*
 !data/input/videos/.gitkeep
 
-# เมิน (Ignore) ไฟล์ทั้งหมดที่อยู่ในโฟลเดอร์ data/output/ ยกเว้นไฟล์ .gitkeep
 data/output/*
 !data/output/.gitkeep
-docs/
+
+# Reference images are enrolment data, not source code. Keep only the folder placeholder.
+data/references/*
+!data/references/.gitkeep
+
+# Generated character features are reproducible from data/references/.
+data/character_db.pkl
+
+# Large media placed outside the standard data folders.
+*.mp4
+*.mkv
+*.avi
+*.mov
+*.webm
+*.wav
+*.mp3
+*.flac
+*.m4a
+
+# Downloaded or trained ML model artifacts and training outputs.
+*.pt
+*.pth
+*.onnx
+*.engine
+*.tflite
+*.mlmodel
+*.mlpackage/
+data/models/**/*.tar.bz2
+data/models/**/*.download
+data/models/vocals/*.json
+# Workspace folders outside data/output also contain private review data.
+workspace.sqlite3*
+.scan.lock
+runs/
+wandb/
+
+# Project documentation is source material and must be tracked.
+!docs/
+!docs/**/*.md

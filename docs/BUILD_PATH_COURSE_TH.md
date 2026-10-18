@@ -1,774 +1,766 @@
-# Path Guide: เขียนระบบระบุตัวผู้พูดทีละขั้น
+# Path Guide: กลับมาทำโปรเจกต์ต่อจาก build_db
 
-เอกสารนี้คือเส้นทางการพัฒนาแบบทำตามได้จริงสำหรับโปรเจ็กต์นี้ ไม่จำเป็นต้องทำทุกบทในวันเดียว และไม่ควรข้ามบทที่ยังทดสอบไม่ผ่าน
+อัปเดตสถานะ 14 ตุลาคม 2026: บท 5–13 มี implementation และ GUI/CLI แล้ว
+อ่าน [คู่มือใช้งาน](USER_GUIDE_TH.md), [ลำดับอ่านโค้ด](CODE_WALKTHROUGH_TH.md) และ [ผลตรวจ/ข้อจำกัด](VERIFICATION_TH.md)
+เนื้อหาขั้นตอนด้านล่างคงไว้เป็นบทเรียน; คำว่า API เสนอในตัวอย่างเก่าให้เทียบ signature จริงใน source
+เอกสารนี้บอกว่าทำอะไรไปแล้ว ควรอ่านอะไร และควรเขียนไฟล์ใดต่อ โดยไม่ให้เขียนของเดิมซ้ำ
 
-เป้าหมายสุดท้ายต่อหนึ่งบรรทัดซับไตเติลคือ:
+**ถ้าจำได้แค่ว่าเคยเขียน build_db:** อ่านบท 0–4 ก่อน แล้วไฟล์ใหม่ที่ควรเริ่มเขียนคือ
+`src/vision/video_sampler.py` ในบท 5 เป็นจุดเริ่มอ่านงานวิดีโอ ไม่ต้องสร้างไฟล์นี้ซ้ำแล้ว
 
-```text
-input:  00:01:05.000 --> 00:01:08.100 | Character ว่าง | "เตรียมตัวให้พร้อม"
-output: Saber | 83% | status=ACCEPTED
-        evidence: visual=0.88, active_speaker=0.76, script=0.00
-```
+## วิธีใช้คู่มือ
 
-ถ้าไม่มีคนที่ผ่านเกณฑ์ในภาพ แม้จะมีเสียงพูด ผลที่ถูกต้องคือ:
+- **[มีแล้ว]** หมายถึงมี implementation ใน source อ่านและลองใช้ได้
+- **[ทำต่อ]** หมายถึงยังต้องเขียนหรือเชื่อมเข้ากับส่วนอื่น
+- **[API เสนอ]** หมายถึงชื่อฟังก์ชัน/data model ที่เสนอสำหรับงานถัดไป ยัง import มาใช้ไม่ได้
+- ตัวอย่างที่ระบุ **[รันได้]** ใช้ API ปัจจุบัน ส่วน signature ในบล็อก text เป็นแบบแปลน
+- หลังจบบทต้องตรวจ output ให้ผ่านเงื่อนไขก่อนข้ามไปบทถัดไป
 
-```text
-output: DEFAULT | 0% | status=NO_VISIBLE_CANDIDATE
-```
+เอกสารประกอบ:
 
-`DEFAULT` หมายถึงผู้บรรยาย, ตัวประกอบ, คนพูดนอกจอ หรือกรณีที่ระบบยังไม่มั่นใจพอ ไม่ใช่ error
+- [ใครเรียกใคร / Input / Return / Error](FUNCTION_FLOW_TH.md) — เปิดข้างกันเวลาเขียน
+- [Architecture และโครงสร้างปัจจุบัน](ARCHITECTURE_TH.md)
+- [สถานะของทุกไฟล์](FILE_MAP.md)
+- [สิ่งที่ย้ายจากโค้ดเก่า](LEGACY_CODE_STATUS_TH.md)
+- [Algorithm และ keyword สำหรับค้นต่อ](IMPLEMENTATION_GUIDE_TH.md)
 
-เอกสารที่เกี่ยวข้อง:
+ลำดับอ่าน:
 
-- [FILE_MAP.md](FILE_MAP.md): หน้าที่ของทุกไฟล์
-- [IMPLEMENTATION_GUIDE_TH.md](IMPLEMENTATION_GUIDE_TH.md): ภาพรวม algorithm และ keyword
-- [LEGACY_CODE_STATUS_TH.md](LEGACY_CODE_STATUS_TH.md): โค้ดเก่าที่ใช้ต่อได้/ถูกปิดไว้
+1. [ทำอะไรไปแล้วและเหลืออะไร](#checkpoint)
+2. [คำศัพท์และข้อมูลที่ส่งต่อ](#contracts)
+3. [เส้นทางสร้าง reference](#enrollment)
+4. [เส้นทางจับคู่ภาพนิ่ง](#still-image)
+5. [ลองของที่มีให้เข้าใจก่อน](#first-run)
+6. [เขียนตัวเลือกเฟรมเป็นงานถัดไป](#sampler)
+7. [ตำแหน่งหน้า → tracking → หลายเฟรม](#detection)
+8. [เสียงและการขยับปาก](#audio)
+9. [รวมหลักฐาน → export → UI](#fusion)
+10. [การทดสอบ ประสิทธิภาพ และแผนครั้งแรก](#verification)
 
----
+<a id="checkpoint"></a>
 
-## 0. รู้สถานะของโปรเจ็กต์ก่อนเริ่ม
+## 0. ก่อนหน้านี้เราทำอะไรไปบ้าง
 
-ตอนนี้โปรเจ็กต์มี 3 กลุ่มไฟล์:
+| ช่วงงาน | สิ่งที่เกิดขึ้น | ความหมายสำหรับตอนนี้ |
+|---|---|---|
+| โค้ดรุ่นแรก | มี UI, extractor, matcher และ build_db | โค้ดภาพเคยอยู่ที่ราก src และชื่อหน้าที่กว้างมาก |
+| ทำ reference | จัดรูปตามชื่อตัวละคร สกัด feature และบันทึก PKL | นี่คือส่วนที่คุณจำได้ ใช้ต่อได้ ไม่ต้องเริ่มใหม่ |
+| เตรียมโมดูล | สร้าง core/io/vision/audio/pipeline พร้อม TODO | การมีชื่อไฟล์ยังไม่ได้แปลว่าฟีเจอร์นั้นเสร็จ |
+| เพิ่ม baseline | มี SRT parser, loader และ visual matcher | โมดูลทำงานแยกได้ แต่ UI ยังไม่ได้เรียกทั้งหมด |
+| จัดระเบียบล่าสุด | ย้าย implementation เข้า vision; แยก reader/storage/workflow/CLI | ไม่มี src/extractor.py หรือ src/matcher.py แล้ว |
+| เพิ่มตัวประสานงาน | VisualIdentifier โหลดฐานหนึ่งครั้ง แล้วคุม crop → features → ranking | เวลาตรวจภาพทั่วไปเริ่มเรียกคลาสนี้ได้ |
+| ตรวจหลังย้าย | ชุดทดสอบ 28 ข้อผ่าน และ reference จริง 9 รูปให้ feature/คะแนนตรงกับก่อนย้าย | เป็นผลตรวจรอบ refactor ไม่ใช่ความแม่นยำผู้พูดทั้งระบบ |
 
-1. **ใช้ต่อได้แล้ว** — `src/extractor.py`, `src/matcher.py`, `src/build_db.py` เป็น baseline สำหรับวัดความคล้ายของสีผม
-2. **ใช้เป็นหน้าจอภายหลัง** — `src/main.py` เปิดวิดีโอ, วาด waveform, seek เวลาได้ แต่ยังไม่ import SRT หรือวิเคราะห์ผู้พูดจริง
-3. **skeleton ที่ต้องเขียน** — ไฟล์ใน `src/core`, `src/io`, `src/vision`, `src/audio`, `src/pipeline`
+ฐาน PKL ของเดิมยังอ่านได้ รูป/วิดีโอ/ซับไม่ได้ถูกย้ายหรือลบระหว่าง refactor
+การย้ายไฟล์อย่างเดียวไม่ต้อง rebuild หากเปลี่ยนสูตรสกัด feature หรือ bins ในอนาคตจึงค่อย rebuild ให้ทั้งสองฝั่งใช้สูตรเดียวกัน
 
-อย่าเขียน logic ใหม่ใน `main.py` ตอนแรก ให้เขียนเป็นฟังก์ชันที่ทดสอบผ่าน terminal ได้ก่อน แล้ว UI จะเรียกฟังก์ชันนั้นในบทสุดท้าย
+### 0.1 สิ่งที่มีแล้ว อย่าเขียนซ้ำ
 
-### คำสั่งที่ควรใช้
-
-รันจาก project root เสมอ:
-
-```bash
-venv/bin/python -m unittest discover -s tests
-venv/bin/python src/build_db.py
-venv/bin/python src/main.py
-ffmpeg -version
-```
-
-หาก `ffmpeg -version` ไม่ทำงาน ให้แก้การติดตั้ง FFmpeg ก่อนเริ่มบทเสียง เพราะทั้ง waveform และ VAD ต้องใช้มัน
-
-### ข้อมูลทดสอบขั้นต่ำ
-
-อย่าเริ่มจาก episode เต็ม ให้เลือกคลิป 30–60 วินาทีที่มีตัวละคร 2–3 คน:
-
-```text
-data/
-  input/videos/test.mp4
-  input/subtitles/test.srt
-  references/
-    Saber/001.png ... 005.png
-    Ayaka/001.png ... 005.png
-  output/
-```
-
-ภาพ reference ควรเห็นหัวและผมชัดเจน, ไม่มีตัวละครหลายคนในภาพเดียว, และมีมุม/แสงต่างกันเล็กน้อย
-
----
-
-## 1. ตั้งสัญญาข้อมูลกลางก่อน
-
-**ไฟล์:** `src/core/models.py`  
-**แก้ไฟล์อื่น:** ยังไม่ต้องแก้  
-**เหตุผล:** ทุกโมดูลต้องพูดภาษาเดียวกัน ถ้าไม่มี data model จะเริ่มส่ง dictionary คนละชื่อ key และแก้ยากมาก
-
-ให้เริ่มด้วย `dataclass` อย่างน้อย 4 ตัวนี้:
-
-```python
-SubtitleSegment(
-    id: int,
-    start_ms: int,
-    end_ms: int,
-    text: str,
-    script_character: str | None,
-)
-
-Candidate(
-    character_name: str,
-    visual_score: float,
-    active_speaker_score: float,
-    script_score: float,
-    final_score: float,
-)
-
-AttributionResult(
-    segment_id: int,
-    detected_character: str,
-    confidence: float,
-    status: str,
-    evidence: dict,
-    candidates: list[Candidate],
-)
-
-CharacterProfile(
-    name: str,
-    references: list[dict],
-)
-```
-
-### กติกาที่ต้องบังคับ
-
-- เวลาเก็บเป็น `int` หน่วย millisecond ทุกที่ภายในโปรแกรม
-- `script_character=None` หมายถึงช่องชื่อว่างจาก input
-- `detected_character="UNKNOWN"` หมายถึงระบบยังเลือกไม่ได้
-- `detected_character="DEFAULT"` หมายถึงไม่มี visible candidate ที่ผ่านเกณฑ์
-- คะแนนภายในระบบอยู่ในช่วง `0.0` ถึง `1.0`; ค่อยแสดง `score * 100` เป็นเปอร์เซ็นต์ใน UI
-- `end_ms` ต้องมากกว่า `start_ms`; invalid input ต้อง raise `ValueError` หรือคืน error ที่อธิบายได้
-
-### เสร็จเมื่อ
-
-สร้าง object ทั้งสี่ได้ และพิมพ์/serialize ค่าออกมาโดยไม่มีข้อมูลกำกวม ก่อนทำบทถัดไป
-
----
-
-## 2. รวมค่าควบคุมและเพดานทรัพยากร
-
-**ไฟล์:** `src/core/config.py`  
-**แก้ไฟล์อื่น:** ยังไม่ต้องแก้  
-**เหตุผล:** threshold และจำนวนเฟรมไม่ควรกระจัดกระจายอยู่หลายไฟล์ และนี่คือจุดป้องกัน Mac ร้อนจากการประมวลผลเกินขอบเขต
-
-เริ่มจาก constants ประมาณนี้:
-
-```python
-DEFAULT_SPEAKER = "DEFAULT"
-UNKNOWN_SPEAKER = "UNKNOWN"
-
-MAX_FRAME_WIDTH = 640
-MAX_FRAMES_PER_SEGMENT = 5
-MAX_KMEANS_PIXELS = 3_000
-CV_THREADS = 1
-FFMPEG_THREADS = 1
-MAX_SECONDS_PER_SEGMENT = 10
-
-MIN_VISUAL_SCORE = 0.45
-ACCEPT_SCORE = 0.70
-```
-
-ก่อน import `numpy`, `sklearn` หรือ `cv2` ใน entry point ให้จำกัด thread ของ native libraries:
-
-```python
-import os
-
-os.environ.setdefault("OMP_NUM_THREADS", "1")
-os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
-os.environ.setdefault("VECLIB_MAXIMUM_THREADS", "1")  # macOS
-os.environ.setdefault("NUMEXPR_NUM_THREADS", "1")
-```
-
-จากนั้นจึงเรียก `cv2.setNumThreads(CV_THREADS)` หลัง import OpenCV
-
-### สิ่งที่ไม่ควรทำ
-
-- อย่าใช้ `while True` เพื่ออ่านวิดีโอ
-- อย่าวิเคราะห์ทุกเฟรมของวิดีโอ 1080p
-- อย่าเรียก KMeans กับ pixel ทุกจุดของภาพเต็ม
-- อย่าเริ่ม process ใหม่ต่อ subtitle ทุกบรรทัด
-
-### เสร็จเมื่อ
-
-ค่าควบคุมทั้งหมดอยู่ในไฟล์เดียว และสามารถปรับจำนวนเฟรม/threshold โดยไม่ต้องค้นหาแก้หลายไฟล์
-
----
-
-## 3. อ่าน SRT จริงให้ได้ก่อน
-
-**ไฟล์:** `src/io/subtitle_io.py`  
-**ทดสอบ:** `tests/test_subtitle_io.py`  
-**แก้ UI:** ยังไม่ต้องแก้  
-**Input:** path ของ `.srt` หรือ `.json`  
-**Return:** `list[SubtitleSegment]`
-
-### ฟังก์ชันแรกที่ควรมี
-
-```python
-def parse_srt(path: Path) -> list[SubtitleSegment]:
-    ...
-```
-
-SRT ปกติมีรูปแบบ:
-
-```text
-1
-00:00:01,500 --> 00:00:03,200
-Saber: พร้อมหรือยัง?
-
-2
-00:00:04,000 --> 00:00:06,000
-ไปกันเถอะ
-```
-
-### วิธีทำทีละส่วน
-
-1. อ่านไฟล์ UTF-8 และแบ่ง block ด้วยบรรทัดว่าง
-2. ในแต่ละ block อ่าน index, time line, text lines
-3. แปลง `HH:MM:SS,mmm` เป็น millisecond ด้วยฟังก์ชันเล็กแยกต่างหาก
-4. เก็บข้อความหลายบรรทัดด้วย `"\n".join(...)`
-5. ถ้า format เป็น `ชื่อ: ข้อความ` และชื่อนั้นอยู่ในรายชื่อตัวละครที่อนุญาต ให้แยกเป็น `script_character`; หากไม่แน่ใจให้เก็บทั้งหมดใน `text` และตั้ง `script_character=None`
-6. อย่าตั้ง `UNKNOWN` ที่นี่ เพราะ parser ไม่ได้วิเคราะห์ใคร
-
-### กรณีที่ test ต้องครอบคลุม
-
-| Input | ผลที่คาดหวัง |
+| ความสามารถ | จุดเข้าใช้งาน |
 |---|---|
-| เวลา `00:00:01,500` | `1500` |
-| Character column ว่าง | `script_character is None` |
-| ข้อความภาษาไทย | ไม่เสีย encoding |
-| ข้อความหลายบรรทัด | มี newline เดิม |
-| `end_ms <= start_ms` | raise error พร้อมบอก index ของ subtitle |
-| SRT เสีย format | ไม่สร้าง segment ปลอม |
+| อ่านรูป local/URL/AniList | `src/io/reference_images.py` |
+| สร้าง/เพิ่ม reference | `src/pipeline/reference_enrollment.py` ผ่าน CLI `src/build_db.py` |
+| โหลด/ตรวจ/บันทึก PKL | `src/io/character_db.py` |
+| ครอปผมจาก portrait, face box หรือ mask | `src/vision/hair_roi.py:crop_hair_roi()` |
+| สกัดสีเด่นและ histogram | `src/vision/hair_features.py:extract_hair_features()` |
+| เปรียบเทียบ feature สองชุด | `src/vision/color_similarity.py:compare_color_features()` |
+| จัดอันดับตัวละครจากหลาย reference | `src/vision/visual_matcher.py:rank_visual_candidates()` |
+| คุมกระบวนการภาพนิ่ง | `src/pipeline/visual_identification.py:VisualIdentifier` |
+| อ่านซับ SRT | `src/io/subtitle_io.py:parse_srt()` |
+| สกัด WAV mono | `src/audio/audio_extract.py:extract_audio()` |
+| เล่นวิดีโอ/แสดง waveform/seek | `src/main.py` |
 
-### เสร็จเมื่อ
+### 0.2 สถานะระบบหลังเชื่อม MVP
 
-คำสั่ง test ผ่าน และการ print รายการ subtitle แสดงเวลา/ข้อความตรงกับไฟล์จริงทุกบรรทัด
+- sampler/detector/tracker/energy VAD/mouth motion/scoring/pipeline/export มีโค้ดแล้ว
+- ยังต้องวัดความแม่นยำบนคำตอบที่ติดป้ายมือ และปรับ baseline จากผลวัด
+- hair shape ยังไม่ถูกสกัด ตอนนี้ใช้สีเท่านั้น
+- หน้าจอเชื่อม Import/Preview/Analyze/Cancel/Manual/Export แล้ว
+- pipeline ทำงานครบวงจร แต่ภาพอย่างเดียวไม่ยืนยันผู้พูด และผลที่ไม่พอจะเป็น UNKNOWN
 
-> หยุดตรงนี้แล้วเปิดดูผลได้เลย: หาก SRT ยังอ่านผิด งานภาพและเสียงหลังจากนี้จะผิดตามทั้งหมด
+### 0.3 คำสั่งและชุดข้อมูลที่ใช้ต่อ
 
----
-
-## 4. เตรียมฐานข้อมูลตัวละคร
-
-**ไฟล์ที่ใช้:** `data/references/`, `src/build_db.py`  
-**ไฟล์ที่จะเขียนภายหลัง:** `src/io/character_db.py` สำหรับ load database  
-**Input:** ภาพ reference ที่จัดโฟลเดอร์ตามตัวละคร  
-**Output:** `data/character_db.pkl`
-
-### จัดข้อมูลให้ถูกก่อน
-
-```text
-data/references/
-  Saber/
-    001.png
-    002.png
-  Ayaka/
-    001.jpg
-```
-
-อย่าวางรูปทั้งหมดใน `data/references/` ชั้นเดียว เพราะ `build_db.py` ใช้ชื่อโฟลเดอร์เป็นชื่อตัวละครเพื่อรองรับชื่อที่มี underscore
-
-### สิ่งที่ `build_db.py` ทำ
-
-1. วนทุกโฟลเดอร์ตัวละคร
-2. อ่านแต่ละภาพด้วย `cv2.imread`
-3. ส่งภาพเข้า `extract_character_features()` เพื่อได้ `dominant_hsv` และ HSV histogram
-4. บันทึกหลาย reference ต่อชื่อตัวละครด้วย `pickle`
-
-รันด้วย:
+รันจาก root โปรเจกต์:
 
 ```bash
-venv/bin/python src/build_db.py
+cd /Users/psskrn/Developer/Speaker_Detection
+venv/bin/python -m src.build_db --help
+venv/bin/python -m unittest discover -s tests -v
 ```
 
-### สิ่งที่คุณต้องเขียนใน `src/io/character_db.py`
+ปัจจุบันใช้วิดีโอ `data/input/videos/Test_1.mp4` กับซับภาษาอังกฤษเรื่อง Oshi no Ko:
+`[subtitlekit.com]_[SubsPlease] Oshi no Ko S3 - 02 (1080p) [C9DF9980].track3.srt`
+ใน `data/input/subtitles/` ส่วน Test_2 เก็บไว้ก่อน
 
-หลังจาก builder ใช้ได้แล้ว ให้เขียน:
+ไม่จำเป็นต้องมีรูปเท่ากันทุกคนหรือใช้ชื่อ 001; จำนวน reference ไม่มีขั้นต่ำตายตัวในสูตรนอกจากมีรูปใช้ได้อย่างน้อยหนึ่งรูปต่อคน
+คุณภาพ crop และภาพทดสอบที่ไม่ซ้ำ reference สำคัญกว่าการทำจำนวนให้ครบ
 
-```python
-def load_character_database(path: Path) -> dict[str, CharacterProfile]:
-    ...
-```
+<a id="contracts"></a>
 
-หน้าที่ของ loader คืออ่าน `.pkl`, ตรวจว่ามี key ที่จำเป็น, และคืนข้อมูลในรูปที่ `visual_matcher.py` ใช้ได้ ห้าม rebuild database ทุกครั้งที่กด Run ใน UI
+## 1. รู้จักข้อมูลก่อนต่อไฟล์
 
-### เสร็จเมื่อ
+**สถานะ: [มีแล้ว]** อ่าน `src/core/models.py` และ `src/core/config.py` ไม่ต้องเขียนใหม่ทั้งหมด
 
-- `character_db.pkl` มีชื่อทุกตัวละคร
-- แต่ละชื่อต้องมี reference อย่างน้อย 1 รายการ
-- รูปพังต้องถูกข้ามพร้อมข้อความแจ้ง ไม่ทำให้การ build ทั้งก้อนล้ม
+module คือไฟล์ Python, function คือขั้นตอนที่เรียกทำงาน, class คือแบบของ object
+instance คือ object ที่สร้างจาก class เช่น identifier ที่จำฐานข้อมูลไว้
+package อย่าง vision คือการจัดกลุ่มโมดูล ไม่ได้สั่งทุกไฟล์ทำงานเอง
 
----
-
-## 5. พิสูจน์ visual matching ก่อนใช้วิดีโอ
-
-**ไฟล์:** `src/vision/hair_roi.py`, `src/vision/hair_features.py`, `src/vision/visual_matcher.py`  
-**ใช้ของเดิม:** `src/extractor.py`, `src/matcher.py`  
-**Input:** ภาพที่มีตัวละครคนเดียวหรือ ROI ที่ครอปด้วยมือ + character database  
-**Return:** ranked `list[Candidate]`
-
-เริ่มจากภาพนิ่งก่อน เพราะหากภาพนิ่งยังจับคู่ผิด การใส่วิดีโอ, tracker และเสียงจะทำให้ debug ยากขึ้นมาก
-
-### 5.1 `hair_roi.py`
-
-ฟังก์ชันที่ควรเขียน:
-
-```python
-def hair_roi_from_head_box(frame, head_box) -> tuple:
-    """Return hair_roi and the ROI coordinates in the original frame."""
-```
-
-`head_box` ใช้รูป `(x, y, width, height)` และคืน ROI เฉพาะบริเวณเหนือ/รอบศีรษะ ห้ามส่งภาพเต็มเข้า `extract_character_features()`
-
-ช่วงแรกคุณยังไม่มี face detector ได้ ให้กำหนด `head_box` ด้วยมือตัวเดียวเพื่อพิสูจน์ส่วนนี้ก่อน
-
-### 5.2 `hair_features.py`
-
-ช่วงแรกให้ wrapper เรียก `extract_character_features(hair_roi)` ของเดิมได้ แต่ต้องอธิบายว่า:
-
-- input เป็น BGR image ตาม OpenCV
-- output ต้องมี `dominant_hsv` และ `histogram`
-- histogram ในโค้ดเก่าถูกแก้เป็น L1-normalized แล้ว จึงนำไปเทียบด้วย intersection ได้
-
-ถ้าต้องเพิ่ม “ทรงผม” ให้เริ่มด้วย feature ที่อธิบายได้ง่าย:
-
-- Canny edge → contour ของผม
-- HOG: รูปแบบทิศทางเส้น/ขอบ
-- LBP: texture ของภาพ
-
-อย่าเริ่ม deep-learning segmentation ใน MVP แรก
-
-### 5.3 `visual_matcher.py`
-
-ฟังก์ชันที่ควรเขียน:
-
-```python
-def rank_visual_candidates(query_features, database) -> list[Candidate]:
-    ...
-```
-
-Algorithm ที่แนะนำ:
-
-1. วนทุก character
-2. เปรียบ query กับ reference ทุกภาพของ character ด้วย `compare_character_features()`
-3. เรียงคะแนน reference จากมากไปน้อย
-4. ใช้ median ของ top-3 หรือคะแนนสูงสุดเป็น `visual_score` ของ character
-5. คืน candidates เรียงจากคะแนนมากไปน้อย
-
-เมื่อมี feature ทรงผมเพิ่ม ให้ขยายสูตร เช่น:
+### 1.1 ภาพ → feature → reference → candidate
 
 ```text
-visual_score = 0.60 * histogram_score
-             + 0.25 * dominant_colour_score
-             + 0.15 * hair_shape_score
+ภาพ BGR uint8 (H, W, 3)
+  ↓ crop_hair_roi
+ภาพ hair ROI
+  ↓ extract_hair_features
+VisualFeatures = {"dominant_hsv": list[float], "histogram": numpy array}
+  ↓ เก็บคู่กับ filename
+ReferenceImage = {"filename": str, "features": VisualFeatures}
+  ↓ รวมตามชื่อ
+CharacterDatabase = dict[str, list[ReferenceImage]]
+
+ภาพที่ตรวจ → VisualFeatures
+  + CharacterDatabase
+  ↓ rank_visual_candidates
+list[Candidate] เรียงตาม visual_score
 ```
 
-### เสร็จเมื่อ
+histogram baseline มีขนาด 30×32 และ normalize ให้ผลรวมเป็น 1
+PKL เก็บ feature กับ filename ไม่ได้เก็บภาพต้นฉบับทั้งภาพ
+VisualFeatures/ReferenceImage เป็น TypedDict แต่ตอนรันยังเป็น dictionary
 
-ภาพ test ที่เป็น Saber ควรคืน Saber เป็นอันดับ 1 และแสดง top-3 พร้อม score แม้ score ยังไม่สูงมากก็ได้
-
----
-
-## 6. สุ่มเฟรมจาก subtitle segment แบบมีขอบเขต
-
-**ไฟล์ใหม่ที่ควรสร้าง:** `src/vision/video_sampler.py`  
-**Input:** `video_path`, `SubtitleSegment`, `fps`  
-**Return:** list ของ `(timestamp_ms, frame)`  
-**เหตุผล:** อย่าให้ `speaker_attribution.py` เปิดวิดีโอและวนทุกเฟรมเอง
-
-Interface ที่แนะนำ:
+### 1.2 ตัวอย่างข้อมูล [รันได้]
 
 ```python
-def sample_segment_frames(video_path, segment, max_frames=5, max_width=640):
-    ...
-```
+from src.core.models import SubtitleSegment, Candidate
 
-### วิธีทำ
-
-1. เปิด `cv2.VideoCapture(video_path)`
-2. อ่าน FPS; ถ้าอ่านไม่ได้ใช้ค่าตั้งต้นที่ชัดเจนหรือ raise error
-3. เลือกเวลา 20%, 40%, 60%, 80%, 90% ระหว่าง `start_ms` และ `end_ms`
-4. แปลงเวลานั้นเป็น frame index แล้ว `cap.set(...); cap.read()`
-5. ถ้า `ret` เป็น `False` ให้ข้าม/หยุด ไม่วนซ้ำ
-6. resize frame ให้กว้างไม่เกิน `MAX_FRAME_WIDTH`
-7. ปิด `cap.release()` เสมอด้วย `try/finally`
-
-ตัวอย่าง loop ที่ปลอดภัย:
-
-```python
-for target_ms in target_times:
-    cap.set(cv2.CAP_PROP_POS_MSEC, target_ms)
-    ok, frame = cap.read()
-    if not ok:
-        continue
-    yield target_ms, resized_frame
-```
-
-### ห้ามทำแบบนี้
-
-```python
-while cap.isOpened():
-    ok, frame = cap.read()
-    # ถ้า ok เป็น False แต่ไม่มี break จะวนไม่สิ้นสุด
-```
-
-### เสร็จเมื่อ
-
-segment ยาว 3 วินาทีคืนมาไม่เกิน 5 frames และไม่มีงานใดใช้เวลานานตามความยาวทั้ง episode
-
----
-
-## 7. ตรวจและติดตามคนในเฟรม
-
-**ไฟล์:** `src/vision/face_detect.py`, `src/vision/character_tracking.py`  
-**Input:** frame BGR ที่ resize แล้ว  
-**Return:** detected head boxes และ tracks
-
-### 7.1 `face_detect.py`
-
-Interface:
-
-```python
-def detect_heads(frame) -> list[dict]:
-    # [{"box": (x, y, w, h), "confidence": 0.92}, ...]
-```
-
-ให้แยก detector ออกจากส่วนอื่นทั้งหมด: ฟังก์ชันนี้ไม่ตัดผม, ไม่จับคู่ชื่อ, ไม่เปิดวิดีโอ
-
-ทางเลือก MVP:
-
-1. **Manual ROI mode** — คืน box ที่ผู้ใช้คลิก/กำหนดเอง; ดีสำหรับพิสูจน์ pipeline กับอนิเมะ
-2. **OpenCV cascade/DNN** — ทดลอง detector สำเร็จรูป
-3. **โมเดลสำหรับ anime face** — ทำหลัง MVP หากมีเวลาและ dataset/weight ที่เหมาะสม
-
-สำคัญ: face detector สำหรับภาพคนจริงอาจตรวจอนิเมะไม่พบ นี่เป็นข้อจำกัดที่ควรรายงาน ไม่ใช่เหตุผลให้เดาชื่อผู้พูด
-
-### 7.2 `character_tracking.py`
-
-Input คือ detections ของหลายเฟรม, output ต้องมี ID คงที่:
-
-```python
-Track(
-    track_id: int,
-    boxes: list[tuple],
-    timestamps_ms: list[int],
+segment = SubtitleSegment(
+    id=1, start_ms=1000, end_ms=2500,
+    text="Hello", script_character=None,
 )
+candidate = Candidate(character_name="Hoshino Aqua", visual_score=0.76)
+print(segment.end_ms - segment.start_ms)  # 1500 ms
+print(candidate.visual_score)            # 0.76
+print(candidate.final_score)             # None: ยังไม่ได้ตัดสินผู้พูด
 ```
 
-เริ่ม tracker ด้วย **IoU**:
+- เวลาเป็น int หน่วย millisecond; end_ms ต้องมากกว่า start_ms
+- `script_character=None` คือไม่ได้ระบุชื่อใน input ไม่ใช่ผล UNKNOWN
+- `0.0` คือคะแนนศูนย์หลังประเมิน ส่วน `None` คือยังไม่มีผลประเมิน
+- `Candidate` เก็บผู้ที่เป็นไปได้ ส่วน `AttributionResult` เก็บผลของ subtitle หนึ่งช่วง
+- คะแนน 0.76 แสดงเป็น 76% ได้ แต่เป็น similarity score ไม่ใช่ probability ที่ผ่าน calibration
+- `AttributionResult.confidence` ปัจจุบันเป็น float ค่าเริ่ม 0.0; ถ้ายังไม่ประเมินต้องดู status=UNPROCESSED ประกอบ ไม่เอาศูนย์ไปตีความว่าแน่ใจว่าไม่ใช่
+
+**จบเมื่อ:** คุณแยกได้ว่าภาพ, feature, database และ candidate เป็นข้อมูลคนละชนิด
+
+<a id="enrollment"></a>
+
+## 2. อ่านงานที่คุณเคยเขียน: build_db → reference
+
+**สถานะ: [มีแล้ว]** งานบทนี้คืออ่านและทดลอง ไม่ใช่สร้าง builder อีกตัว
+
+เปิดไฟล์ตามลำดับ:
+
+1. `src/build_db.py:main(argv=None)` — อ่าน argument แล้วเลือก batch หรือรูปเดี่ยว
+2. `src/pipeline/reference_enrollment.py` — คุมขั้นตอนสร้าง feature และเก็บ reference
+3. `src/io/reference_images.py` — อ่านรูป/ดาวน์โหลด; ไม่เขียนฐาน
+4. `src/io/character_db.py` — ตรวจและอ่าน/เขียนฐาน; ไม่สกัดภาพ
+
+### 2.1 Batch: อ่านทุกรูปในโฟลเดอร์
 
 ```text
-IoU = พื้นที่ทับซ้อน / พื้นที่รวม
+main()
+  → build_character_database(reference_dir, output_db_path)
+      → iter_reference_images(reference_dir)
+      → read_reference_image(image_path)
+      → crop_hair_roi(portrait)
+      → extract_hair_features(hair_roi)
+      → save_character_database(database, output_db_path)
+  ← CharacterDatabase กลับมาให้ CLI พิมพ์สรุป
 ```
 
-- ถ้า box ในเฟรมใหม่มี IoU มากกว่า threshold เช่น 0.3 กับ track เดิม → ต่อ track เดิม
-- ถ้าไม่มี → สร้าง track ใหม่
-- ถ้า track หายเกิน 2 sample frames → ปิด track
-
-ไม่ต้องเริ่ม Kalman filter หรือ deep tracker จนกว่าจะพิสูจน์ว่า IoU ไม่พอ
-
-### เสร็จเมื่อ
-
-ใน segment ที่มีสองคน ระบบคืนอย่างน้อยสอง track และคนเดิมไม่ได้เปลี่ยน ID ทุกเฟรม
-
----
-
-## 8. ทำ visual attribution สำหรับทั้งช่วง subtitle
-
-**ไฟล์:** `src/pipeline/speaker_attribution.py` (ส่วน visual-only ก่อน)  
-**เรียกใช้:** video sampler → detector → tracker → ROI → features → matcher  
-**Input:** video path, `SubtitleSegment`, character database  
-**Return:** candidates ของทุก visible track
-
-ในขั้นนี้ยังไม่ต้องใช้เสียง จุดประสงค์คือให้ได้คำตอบว่า “ในช่วงนี้มีใครบ้าง และแต่ละคนคล้ายตัวละครใด”
-
-Algorithm ต่อหนึ่ง segment:
-
-1. sample ไม่เกิน 5 frames
-2. detect heads ทุก frame
-3. connect detections เป็น tracks
-4. สำหรับแต่ละ track เลือก 1–3 ROI ที่คมที่สุด
-5. สกัด hair features
-6. rank character candidates
-7. aggregate score ของ track ด้วย median
-
-ตัวอย่าง return ที่ดี:
-
-```python
-[
-    {
-        "track_id": 3,
-        "top_candidates": [
-            {"character_name": "Saber", "visual_score": 0.84},
-            {"character_name": "Ayaka", "visual_score": 0.39},
-        ],
-    }
-]
-```
-
-อย่าเลือก speaker final ในบทนี้ เพราะคนที่มองเห็นอาจไม่ได้กำลังพูด
-
-### เสร็จเมื่อ
-
-สามารถพิมพ์รายงานหนึ่ง segment ว่า track ไหนเห็นอยู่และแต่ละ track คล้ายใครกี่เปอร์เซ็นต์
-
----
-
-## 9. สกัดเสียงและตรวจช่วงพูด
-
-**ไฟล์:** `src/audio/audio_extract.py`, `src/audio/vad.py`  
-**Input:** video path และเวลาของ subtitle segment  
-**Return:** รายการช่วง speech และ `speech_ratio`  
-**คำเตือน:** VAD ไม่ได้คืนชื่อตัวละคร
-
-### 9.1 `audio_extract.py`
-
-Interface:
-
-```python
-def extract_mono_wav(video_path, output_path, sample_rate=16_000) -> Path:
-    ...
-```
-
-ให้เรียก FFmpeg ด้วย command ที่มี `-threads 1`, ตรวจ `returncode`, และ raise error ถ้า FFmpeg ล้มเหลว ห้าม redirect error ทิ้งเงียบ ๆ
-
-### 9.2 `vad.py`
-
-MVP ที่ไม่ต้องเพิ่ม package:
-
-1. อ่าน WAV mono
-2. แบ่ง window ยาว 20–30 ms
-3. คำนวณ RMS energy ต่อ window
-4. ถ้า RMS สูงกว่า threshold → speech candidate
-5. รวม candidate ที่อยู่ติดกัน และตัดช่วงสั้นมากที่น่าจะเป็น noise
-
-Interface:
-
-```python
-def detect_speech_ranges(wav_path) -> list[tuple[int, int]]:
-    """Return [(start_ms, end_ms), ...]."""
-
-def speech_overlap_ratio(segment, speech_ranges) -> float:
-    """Return 0.0–1.0."""
-```
-
-เกณฑ์ MVP:
-
-- overlap ต่ำมาก เช่น `< 0.15` → status `NO_SPEECH`
-- overlap สูง → ไปวิเคราะห์ active speaker ต่อ
-
-ข้อจำกัด: RMS energy จะสับสนกับเพลงและ sound effect ได้ ให้จด limitation นี้ไว้ในรายงาน หากจะพัฒนาต่อให้ค้น keyword `webrtcvad` หรือ `Silero VAD`
-
----
-
-## 10. ตรวจคนที่น่าจะกำลังพูดจากปาก
-
-**ไฟล์:** `src/vision/active_speaker.py`  
-**Input:** track ของหัว/หน้า, frame ต่อเนื่อง, VAD speech range  
-**Return:** `dict[int, float]` mapping `track_id -> active_speaker_score`
-
-อย่าสับสนสองคำนี้:
-
-```text
-VAD:               มีเสียงพูดในช่วงนี้ไหม?
-Active speaker:    คนที่เห็นคนไหนปากขยับสอดคล้องกับเสียงนั้น?
-```
-
-วิธี MVP:
-
-1. จาก head box กำหนด mouth ROI เป็นบริเวณกึ่งล่างกลางของ box
-2. ตัด mouth ROI ของ frame ก่อนและหลัง
-3. แปลง grayscale
-4. คำนวณ mean absolute difference หรือ optical flow
-5. normalize movement ของทุก track ใน segment เป็น 0–1
-6. track ที่ mouth motion สูงสุดเมื่อ VAD มี speech ได้คะแนนสูงกว่า
-
-Interface:
-
-```python
-def score_active_speakers(track_frames, speech_ranges) -> dict[int, float]:
-    ...
-```
-
-หาก mouth ROI หาไม่ได้/ไม่มี frame ต่อเนื่อง ให้คืน 0.0 และเก็บเหตุผล `insufficient_mouth_frames` อย่าปลอมคะแนน
-
-### เสร็จเมื่อ
-
-ในคลิปทดสอบที่คนหนึ่งขยับปากชัด คะแนนของ track นั้นสูงกว่า track อื่นอย่างสม่ำเสมอ
-
----
-
-## 11. รวมหลักฐานและตัดสิน Character / UNKNOWN / DEFAULT
-
-**ไฟล์:** `src/pipeline/confidence_scoring.py`, `src/pipeline/speaker_attribution.py`  
-**Input:** visual candidates, active speaker scores, `script_character`, VAD result  
-**Return:** `AttributionResult`
-
-### `confidence_scoring.py`
-
-ฟังก์ชันแนะนำ:
-
-```python
-def calculate_script_score(candidate_name, script_character) -> float:
-    ...
-
-def combine_scores(visual_score, active_speaker_score, script_score) -> float:
-    ...
-```
-
-ตัวอย่างน้ำหนักเริ่มต้น:
-
-```text
-final_score = 0.50 * visual_score
-            + 0.35 * active_speaker_score
-            + 0.15 * script_score
-```
-
-กฎ `script_score`:
-
-- ชื่อใน script ว่าง (`None`) → 0.0 ต่อทุก candidate
-- ชื่อตรง candidate → 1.0
-- ชื่อไม่ตรง → 0.0 แต่เก็บ status `SCRIPT_CONFLICT` ถ้าภาพ/เสียงชี้ไปคนอื่นแรงมาก
-
-### `speaker_attribution.py`
-
-ลำดับตัดสินที่ควรใช้:
-
-```text
-1. subtitle text ว่าง            -> SKIPPED_EMPTY_TEXT
-2. VAD ไม่พบ speech              -> NO_SPEECH
-3. ไม่มี visible tracks          -> DEFAULT
-4. มี tracks แต่ visual < minimum -> DEFAULT
-5. มี candidate แต่ final ต่ำ     -> UNKNOWN
-6. final >= ACCEPT_SCORE          -> ACCEPTED + ชื่อตัวละคร
-```
-
-ตัวอย่าง return:
-
-```python
-AttributionResult(
-    segment_id=7,
-    detected_character="Saber",
-    confidence=0.83,
-    status="ACCEPTED",
-    evidence={
-        "visual_score": 0.88,
-        "active_speaker_score": 0.76,
-        "script_score": 1.00,
-        "speech_overlap_ratio": 0.91,
-    },
-    candidates=[...],
-)
-```
-
-### เสร็จเมื่อ
-
-ทุก segment ได้ผลลัพธ์หนึ่งแบบที่อธิบายได้ และไม่มี code path ที่ตั้งชื่อ `Character_01` โดยไม่มี evidence
-
----
-
-## 12. Export ผลก่อนต่อ GUI
-
-**ไฟล์:** `src/io/result_export.py`  
-**Input:** `list[AttributionResult]` + subtitle segments  
-**Output:** JSON และ SRT ที่มีชื่อ speaker
-
-ให้ export JSON ก่อน เพราะเก็บหลักฐานได้ครบ:
-
-```json
-{
-  "segment_id": 7,
-  "start_ms": 65000,
-  "end_ms": 68100,
-  "text": "เตรียมตัวให้พร้อม",
-  "detected_character": "Saber",
-  "confidence": 0.83,
-  "status": "ACCEPTED",
-  "evidence": {
-    "visual_score": 0.88,
-    "active_speaker_score": 0.76,
-    "script_score": 1.0
-  }
-}
-```
-
-SRT เป็นผลแสดงผล อาจใส่ชื่อแบบ:
-
-```text
-Saber: เตรียมตัวให้พร้อม
-```
-
-แต่ SRT มาตรฐานเก็บ evidence ไม่ได้ จึงห้ามใช้แทน JSON สำหรับผลวิเคราะห์
-
-### เสร็จเมื่อ
-
-เปิด JSON แล้วสามารถอธิบายได้ว่าทำไมระบบจึงเลือกชื่อนั้น และเปิด SRT แล้วเวลา/ข้อความยังถูกต้อง
-
----
-
-## 13. ค่อยเชื่อม UI เป็นขั้นสุดท้าย
-
-**ไฟล์:** `src/main.py`  
-**Input จากผู้ใช้:** video, SRT/JSON, ปุ่ม Run  
-**แสดง:** ชื่อที่ตรวจพบ, confidence, status, evidence
-
-ลำดับแก้ UI:
-
-1. ปุ่ม Import เรียก `parse_srt()` แล้วเติม table จาก `SubtitleSegment`
-2. เพิ่ม columns: `Detected`, `Confidence`, `Status`, `Evidence`
-3. ปุ่ม Run เรียก `speaker_attribution.py` ไม่เรียก `extract_character_features(frame)` โดยตรง
-4. ใช้ `QThread` หรือ worker เพื่อให้ปุ่ม Cancel/หน้าจอยังตอบสนอง
-5. เมื่อผู้ใช้แก้ชื่อเอง ให้บันทึก field เช่น `manual_character`; ห้าม overwrite ใน Run รอบถัดไป
-6. ปุ่ม Export เรียก `result_export.py`
-
-ก่อนมี worker thread ให้ทดสอบ pipeline ด้วย terminal จนผลถูกต้องก่อน เพราะ UI จะทำให้ debug ยากขึ้น
-
----
-
-## 14. Test ที่ต้องมีในทุกบท
-
-ใช้ `unittest` ซึ่งมากับ Python ได้ ไม่ต้องเพิ่ม package ก่อน:
+save คืน None เพราะทำหน้าที่เขียนไฟล์ แต่ build คืน dict ที่สร้างเสร็จแล้ว
+การ return None ไม่ได้หมายถึงล้มเหลวทุกฟังก์ชัน ต้องอ่านสัญญาของฟังก์ชันนั้น
+ภาพที่อ่านไม่ได้หรือไม่มี feature จะถูกข้ามพร้อม warning; หากยังมีภาพใช้ได้จะเขียนฐานจากเฉพาะภาพเหล่านั้น
+หากไม่มีรูปใช้ได้เลยจะ raise และไม่แทนที่ฐานเดิม จึงต้องอ่าน warning แม้คำสั่งจบสำเร็จ
+
+คำสั่งนี้เขียนทับ PKL จากภาพที่มีอยู่ใน references ใช้เมื่อเพิ่ม/เปลี่ยนชุดรูปจริง:
 
 ```bash
-venv/bin/python -m unittest discover -s tests
+venv/bin/python -m src.build_db
 ```
 
-เพิ่ม test ตามไฟล์:
+ถ้าแค่ต้องการดูจำนวนที่มีใน PKL โดยไม่ rebuild:
 
-| ไฟล์ | Test ที่ควรมี |
+```python
+from src.io.character_db import load_character_database
+
+database = load_character_database()
+for name, references in database.items():
+    print(f"{name}: {len(references)} reference(s)")
+```
+
+โหลดเฉพาะ PKL ที่เชื่อถือได้ การตรวจ schema หลังโหลดไม่ได้ป้องกันอันตรายจาก pickle ภายนอก
+
+### 2.2 รูปเดี่ยว: อ่านภาพก่อน แล้วส่งให้ workflow
+
+```text
+main(--name ..., --file ...)
+  → read_reference_image(path)
+  → add_character_reference(name, portrait, reference_dir, output_db_path)
+      → crop → extract
+      → load PKL เดิม (ถ้ามี)
+      → เก็บสำเนารูป
+      → save PKL ที่เพิ่ม reference แล้ว
+  ← Path รูปที่บันทึก
+```
+
+add_character_reference คืน Path หรือ raise; ไม่ใช่ bool แบบโค้ดรุ่นก่อน
+หากทดลองไม่อยากแตะฐานจริง ให้ระบุ `--reference-dir` และ `--database` เป็นโฟลเดอร์ทดสอบแยก
+รูปที่ส่งเข้า enrollment ต้องเป็น portrait ตัวละครเดียว ไม่ใช่เฟรมหลายคนหรือ hair ROI ที่ตัดชิดแล้ว
+
+**จบเมื่อ:** อธิบายได้ว่า build_db เป็น CLI ส่วน reference_enrollment เป็นคนคุมงาน และรู้ว่าใครเขียน PKL
+
+<a id="still-image"></a>
+
+## 3. อ่านการจับคู่ภาพ: VisualIdentifier → vision
+
+**สถานะ: [มีแล้ว]** จุดเริ่มสำหรับผู้ใช้โมดูลคือ `src/pipeline/visual_identification.py`
+
+### 3.1 สองวิธีใช้ ต่างกันตรงใครครอป
+
+| วิธี | ส่งอะไร | ภายในทำอะไร |
+|---|---|---|
+| `identifier.identify_portrait(image, bbox=None, hair_mask=None)` | portrait หรือ frame พร้อม face box/mask | crop → extract → rank |
+| `identifier.identify_hair_roi(hair_roi)` | ภาพผมที่เลือกแล้ว | extract → rank; ไม่ crop ซ้ำ |
+
+ถ้าไม่มี box/mask, crop_hair_roi ใช้ส่วนบน 45% ของภาพ จึงต้องเป็น portrait คนเดียว
+face box ต้องเป็น `(x, y, width, height)` ของใบหน้า ไม่ใช่ xyxy และใช้พิกัดของ frame ที่ส่งจริง
+
+### 3.2 ผู้รับผิดชอบแต่ละขั้น
+
+| ผู้เรียก | ปลายทาง | Input → Return |
+|---|---|---|
+| ผู้ใช้โมดูล | `VisualIdentifier.from_database(db_path=..., top_k=3)` | PKL → instance ที่จำฐานไว้ |
+| identify_portrait | `crop_hair_roi` | ภาพ + box/mask → BGR hair ROI |
+| identify_hair_roi | `extract_hair_features` | hair ROI → VisualFeatures หรือ None |
+| identify_hair_roi | `rank_visual_candidates` | features + database + top_k → list[Candidate] |
+| rank_visual_candidates | `compare_color_features` | query กับ reference หนึ่งรูป → dict คะแนนหนึ่งคู่ |
+
+ภายใน hair_features เรียก filter, KMeans และ histogram
+ภายใน color_similarity เรียกตัวเทียบ histogram และสีเด่น
+รายละเอียดทุกฟังก์ชันอยู่ใน [Function Flow](FUNCTION_FLOW_TH.md)
+
+### 3.3 คะแนนมาจากไหน
+
+```text
+คู่ภาพหนึ่งคู่:
+  score = 0.70 * hist_score + 0.30 * color_score
+
+ตัวละครหนึ่งคน:
+  visual_score = ค่าเฉลี่ย score ของ reference ที่ดีที่สุดไม่เกิน top_k รูป
+```
+
+weights อ่านจาก config แล้วจริง และยังไม่มี hair-shape score
+top_k=3 ไม่ได้แปลว่าคืนแค่สามคน; ถ้าจะโชว์สามคนให้ใช้ candidates[:3]
+ขั้นนี้ยังไม่ตั้ง final_score และไม่กำหนด DEFAULT/UNKNOWN เพราะยังไม่มีหลักฐานพูด
+
+**จบเมื่อ:** คุณไล่จาก identifier ไปถึงตัวคำนวณ histogram similarity ได้ โดยไม่คิดว่ามันสร้าง histogram จากรูปซ้ำ
+
+<a id="first-run"></a>
+
+## 4. แบบฝึกหัดก่อนเขียนโมดูลถัดไป
+
+**สถานะ: [ใช้ของที่มีแล้ว]** ทำให้เห็น input/output จริงก่อนเพิ่มวิดีโอ
+
+### 4.1 ทดสอบการต่อสายด้วยภาพที่อยู่ในฐาน [รันได้]
+
+เปิด Python ด้วย `venv/bin/python` จาก root แล้ววางตัวอย่างนี้:
+
+```python
+from src.core.config import REFERENCES_DIR
+from src.io.reference_images import read_reference_image
+from src.pipeline.visual_identification import VisualIdentifier
+
+identifier = VisualIdentifier.from_database()
+portrait = read_reference_image(REFERENCES_DIR / "Hoshino Aqua" / "001.jpg")
+candidates = identifier.identify_portrait(portrait)
+
+for candidate in candidates[:3]:
+    print(candidate.character_name, f"{candidate.visual_score:.1%}")
+```
+
+ทำซ้ำกับภาพ Ruby โดยใช้ identifier ตัวเดิม
+ไม่ต้องโหลด PKL ใหม่ทุกภาพ และยังไม่ต้องเปิด UI
+การใช้รูปในฐานพิสูจน์การต่อสาย ไม่ได้พิสูจน์ accuracy กับภาพใหม่
+ค่าเฉลี่ยหลาย reference ไม่จำเป็นต้องได้ 100% แม้รูปที่ตรวจจะเป็นหนึ่งใน reference
+
+### 4.2 อ่านซับ Test_1 [รันได้]
+
+```python
+from src.core.config import INPUT_SUBTITLES_DIR
+from src.io.subtitle_io import parse_srt
+
+subtitle_path = INPUT_SUBTITLES_DIR / (
+    "[subtitlekit.com]_[SubsPlease] Oshi no Ko S3 - 02 (1080p) [C9DF9980].track3.srt"
+)
+segments = parse_srt(subtitle_path)
+print("segments:", len(segments))
+for segment in segments[:3]:
+    print(segment.id, segment.start_ms, segment.end_ms, segment.script_character, segment.text)
+```
+
+ภาษาอังกฤษใช้ได้ parser อ่านข้อความกับเวลา ไม่ต้องแปล
+prefix เช่น `[Aqua]: Hello` จะถูกแยกด้วย regex แต่ parser ปัจจุบันยังไม่ตรวจว่าชื่อนี้อยู่ในฐานหรือเป็นชื่อคนจริง
+หากต้องการตรวจชื่อ ใช้ has_character(name, database) ในขั้นตรวจ input หรือ pipeline เพิ่มภายหลัง
+
+### 4.3 ทดสอบภาพใหม่จริง
+
+1. เลือกภาพใหม่ที่ไม่ได้อยู่ใน references ให้รู้คำตอบด้วยตัวเองก่อน
+2. ครอป portrait ตัวละครหนึ่งคน แล้วใช้ identify_portrait
+3. ถ้าตัดไว้เฉพาะผมแล้ว ใช้ identify_hair_roi
+4. จดอันดับ 1, อันดับ 2 และส่วนต่างคะแนน อย่าดูแค่ชื่อที่ได้
+5. ถ้าผิด ให้ดู ROI ก่อนปรับ threshold; background/เส้นขอบ/ผมสีคล้ายกันทำให้สับสนได้
+6. ยังไม่เพิ่มภาพทดสอบนั้นเข้า reference จนกว่าจะบันทึกผลประเมินไว้ มิฉะนั้นจะไม่ได้วัดกับข้อมูลใหม่
+
+**จบเมื่อ:** ภาพนิ่งใหม่บางภาพจัดอันดับได้สมเหตุผล และอ่านช่วงเวลาจาก SRT ได้
+ถ้ายังจับคู่ภาพนิ่งผิดมาก ให้ปรับ reference/ROI ก่อน อย่าเพิ่ม detector เพื่อกลบปัญหา
+
+<a id="sampler"></a>
+
+## 5. งานใหม่ชิ้นแรก: อ่านเฉพาะเฟรมที่ต้องใช้
+
+**สถานะ: [มีแล้ว]** `src/vision/video_sampler.py`
+**แก้เพิ่ม:** `src/core/models.py` สำหรับ FrameSample
+**test:** `tests/test_video_sampler.py` มีแล้ว
+
+### 5.1 สัญญาข้อมูล [มีใน source แล้ว]
+
+```text
+FrameSample:
+  timestamp_ms: int    เวลาที่ขออ่านจากวิดีโอ
+  frame: BGR array    ภาพหลัง resize
+
+sample_segment_frames(video_path, segment, max_frames=5, max_width=640)
+  → list[FrameSample]
+```
+
+timestamp_ms ตามสัญญาแรกนี้คือเวลาที่ขออ่าน ไม่ใช่การรับประกันว่า decoder คืนภาพตรง millisecond นั้น
+หากต้องใช้เวลาจริง ให้เก็บเวลาที่ decode ได้อีก field และตรวจ backend ก่อน
+
+**ใครจะเรียก:** speaker_attribution เมื่อรวม workflow ในบท 11; ระหว่างบท 5–8 เรียกจาก test/สคริปต์เล็ก ๆ ก่อน
+**ฟังก์ชันนี้เรียกอะไร:** OpenCV VideoCapture, set/read/resize; ไม่เรียก matcher และไม่แก้ตาราง UI
+
+### 5.2 วิธีเขียนทีละขั้น
+
+1. ตรวจ max_frames/max_width ต้องเป็นจำนวนบวก และ segment มี start/end ที่ถูกต้อง
+2. เปิด VideoCapture ครั้งเดียวต่อการเรียก MVP; หากเปิดไม่ได้ให้ raise error
+3. สร้างเวลาเป้าหมายที่กระจายในช่วงซับ ไม่เกิน max_frames และตัด frame index ที่ซ้ำกัน
+4. วน `for target in targets` ให้จำนวนรอบมีขอบเขต
+5. seek และ read; หากอ่านไม่ได้ ให้ข้ามเป้าหมายนั้นหรือหยุด ไม่ retry แบบไม่จำกัด
+6. resize โดยคงอัตราส่วน ไม่ขยายภาพเล็กให้ใหญ่เกินจำเป็น
+7. สร้าง FrameSample ตามลำดับเวลา แล้วคืน list; ไม่มีเฟรมใช้ได้คืน []
+8. ใช้ try/finally เพื่อ release capture เสมอ แม้เกิด error
+
+ใช้ค่าตั้งต้นจาก config แทนใส่เลขซ้ำหลายไฟล์
+เมื่อ MVP ผ่านแล้วค่อยเปลี่ยนเป็น VideoSampler class ที่เปิดวิดีโอครั้งเดียวสำหรับหลาย segment
+ไม่ต้องทำ class หลายชั้นก่อนให้ฟังก์ชันแรกทดสอบผ่าน
+
+### 5.3 ต้องทดสอบอะไร
+
+- ขอ 5 เฟรมแล้วไม่เคยได้เกิน 5; ทุกภาพกว้างไม่เกิน 640 ตามค่าตั้งต้น
+- วิดีโอสั้น/ช่วงเวลาเกินท้ายคลิปไม่วนค้าง
+- read ล้มเหลวแล้วจำนวนครั้งที่อ่านยังมีขอบเขต และ capture ถูก release
+- frame box ในบทถัดไปต้องอิงภาพหลัง resize ห้ามผสมพิกัดต้นฉบับกับภาพย่อ
+- เริ่มด้วยช่วงซับหนึ่งบรรทัดจาก Test_1 ไม่ต้องวิ่งทั้งคลิป
+
+**จบเมื่อ:** พิมพ์เวลาและ shape ของเฟรมตัวอย่างได้ถูกต้อง
+จำนวน read ที่จำกัดช่วยลดงาน แต่ไม่ได้รับประกันระยะเวลาตายตัว เพราะการ seek/decode ยังขึ้นกับไฟล์
+
+<a id="detection"></a>
+
+## 6. หาตำแหน่งคน: manual face box ก่อน detector
+
+**สถานะ: [มีแล้ว]** anime-face YOLO ใน `src/vision/face_detect.py`
+**เพิ่ม model ที่เสนอ:** FaceDetection(box, confidence)
+**test ใหม่:** `tests/test_face_detect.py`
+
+### 6.1 เริ่มโดยยังไม่ต้องมีโมเดลตรวจจับ
+
+เปิดเฟรมตัวอย่างจากบท 5 แล้วกำหนด face box ด้วยมือสำหรับแต่ละภาพ
+ส่งภาพนั้นกับ face box เข้า `identifier.identify_portrait(frame, bbox=face_box)` ที่มีอยู่แล้ว
+วิธีนี้พิสูจน์เส้นทาง video → ROI → ranking ได้ก่อนลงทุนกับ detector
+
+พิกัด face box เปลี่ยนได้ทุกเฟรม อย่าใช้กล่องเดียวทั้งคลิปหากตัวละครเคลื่อน
+ถ้ามี ROI ผมที่ตัดเองให้ใช้ identify_hair_roi โดยตรง
+hair_roi ปัจจุบันใช้ heuristic จากใบหน้า; ถ้าตัวตรวจคืนกรอบทั้งหัว ต้องแปลงหรือตั้งกฎ crop ให้ตรงกันก่อนใช้
+
+### 6.2 ค่อยเขียน detector [API เสนอ]
+
+```text
+detect_faces(frame) → list[FaceDetection]
+FaceDetection:
+  box: (x, y, width, height) ของใบหน้า
+  confidence: float หรือ None ถ้าเป็นกล่องกำหนดเอง
+```
+
+**ใครเรียก:** speaker_attribution วนเรียกต่อ FrameSample
+**เรียกต่อไปไหน:** คืน detection ให้ tracker; detector ไม่ต้องเรียก matcher เอง
+
+เลือก detector ทดลองหนึ่งแบบ เช่น OpenCV หรือโมเดลสำหรับ anime ที่คุณมี
+ถ้าจะกลับไปใช้ YOLO ให้วางการโหลด/เรียกโมเดลไว้ที่โมดูลนี้ แล้วแปลง output ให้เป็น FaceDetection
+YOLO เป็นวิธีตรวจตำแหน่ง ไม่ใช่ตัวแทนฐาน reference และ matcher; น้ำหนักที่ไม่ได้ฝึกใบหน้าอนิเมะไม่ได้รับประกันว่าจะตรวจได้
+
+**จบเมื่อ:** วาดกรอบตรวจตำแหน่งแล้วเห็นว่ากล่องครอบใบหน้าถูกคน
+กรณีไม่พบให้คืน [] และเก็บเหตุผล ไม่สร้างชื่อคนแทนผลตรวจ
+
+## 7. รู้ว่าคนนี้คือคนเดิมข้ามเฟรม: tracking
+
+**สถานะ: [มี baseline แล้ว]** `src/vision/character_tracking.py`
+**เพิ่ม models ที่เสนอ:** TrackObservation และ FaceTrack
+**test ใหม่:** `tests/test_character_tracking.py`
+
+```text
+TrackObservation:
+  sample_index: int
+  box: (x, y, width, height)
+
+FaceTrack:
+  track_id: int
+  observations: list[TrackObservation]
+
+track_faces(samples, detections_by_frame) → list[FaceTrack]
+```
+
+detections_by_frame[i] คือ list[FaceDetection] ของ samples[i] ต้องมีจำนวนกลุ่มตรงกัน
+sample_index ทำให้หา frame/เวลาได้จาก samples โดยไม่เก็บสำเนาภาพซ้ำทุก track
+track_id เป็นเลขคนในภาพ ไม่ใช่ชื่อ Aqua/Ruby และใน MVP ให้จำกัด ID ต่อ segment ก่อน
+
+**ใครเรียก:** speaker_attribution หลัง detect แต่ละเฟรม
+**ใครรับผล:** collect_visual_candidates และ active_speaker ในบทหลัง
+
+เริ่ม IoU matching: กล่องในเฟรมใหม่ที่ทับกับของเดิมมากพอจับเป็น track เดิม
+ต้องจับคู่แบบหนึ่งกล่องต่อหนึ่ง track ไม่ให้กล่องเดียวถูกใช้สองคน
+กล่องใหม่สร้าง ID ใหม่; หายไปนานหรือเปลี่ยนฉากให้ปิด track อย่าลาก ID ข้ามฉากโดยไม่มีหลักฐาน
+
+**จบเมื่อ:** กล่องสังเคราะห์ของคนสองคนเคลื่อนทีละน้อยแล้วยังมี ID คงที่
+รายงานข้อจำกัดเมื่อภาพ sample ห่างหรือมีฉากตัด ไม่ถือว่า IoU จะแก้ทุกกรณี
+
+## 8. รวมภาพหลายเฟรมต่อคน แต่ยังไม่ตัดสินผู้พูด
+
+**สถานะ: [มีแล้ว]** `collect_visual_candidates` ใน `src/pipeline/speaker_attribution.py`
+**เพิ่ม model ที่เสนอ:** TrackEvidence
+**test ใหม่:** `tests/test_speaker_attribution.py`
+
+```text
+TrackEvidence:
+  track_id: int
+  candidates: list[Candidate]
+  sample_times_ms: list[int]
+  active_speaker_score: float | None
+
+collect_visual_candidates(samples, tracks, identifier) → list[TrackEvidence]
+```
+
+**ใครเรียก:** attribute_segment ที่จะเขียนในบท 11
+**ฟังก์ชันนี้เรียกของที่มีแล้ว:** `identifier.identify_portrait(frame, bbox=observation.box)`
+
+ขั้นตอน:
+
+1. วนแต่ละ track แล้วเลือก observations ที่กล่องใช้ได้
+2. หาภาพผ่าน samples[observation.sample_index] ไม่สลับ frame/box ระหว่างคน
+3. เรียก identifier ตัวเดิมต่อ observation
+4. รวมคะแนนแยกตาม character_name ภายใน track นั้น เช่น median ของคะแนนจากเฟรมที่ประเมินได้
+5. เก็บจำนวนเฟรมที่ให้หลักฐานและเวลาที่ใช้ จะได้รู้ว่าได้ 0.9 จากหนึ่งเฟรมหรือหลายเฟรม
+6. หากไม่มี feature ใช้ได้ ให้เก็บเหตุผลแยกจากกรณี detector ไม่พบคน
+
+API ภาพนิ่งปัจจุบันคืน [] ได้ทั้งเมื่อ crop ใช้ไม่ได้และเมื่อไม่มี feature
+จึงห้ามตีความ [] จาก identifier ว่าไม่มีคนในเฟรม; ต้องดูผล detector และเก็บสถานะ ROI/feature เพิ่มใน workflow
+
+มีการรวมคะแนนสองชั้นที่ต่างกัน:
+visual_matcher รวมหลาย reference ของคนหนึ่งชื่อ ส่วนฟังก์ชันใหม่นี้รวมหลายเฟรมของคนหนึ่ง track
+ห้ามรวมชื่อ Aqua ของ track ซ้ายกับคะแนนปากของ track ขวา
+
+**จบเมื่อ:** รายงานได้ว่า “track 1 คล้าย Aqua เท่าไร / track 2 คล้าย Ruby เท่าไร”
+ยังไม่ใส่ชื่อผู้พูดลงซับเพียงเพราะมองเห็นคนหนึ่งอยู่
+
+<a id="audio"></a>
+
+## 9. เสียง: สกัดมีแล้ว เหลือหาช่วงที่น่าจะพูด
+
+### 9.1 Audio extraction [มีแล้ว]
+
+ใช้ `src/audio/audio_extract.py:extract_audio(video_path, output_path, sample_rate=16000)`
+ชื่อจริงคือ extract_audio ไม่ใช่ extract_mono_wav ตามแผนเก่า
+
+return เป็น Path WAV mono; ถ้า FFmpeg ล้มเหลวจะ raise
+เรียกครั้งเดียวต่อวิดีโอแล้วใช้ซ้ำทุก segment ไม่สั่ง FFmpeg ใหม่ทุกบรรทัดซับ
+output_path ถูกเขียนทับเมื่อมีอยู่ จึงเลือกไฟล์สำหรับงานวิเคราะห์ให้ชัดและแยกจาก waveform
+
+ตัวอย่างการเรียกในอนาคตเมื่อเลือก path แล้ว:
+
+```text
+extract_audio(video_path, analysis_wav_path, sample_rate=16000)
+  → Path WAV
+```
+
+### 9.2 VAD [มี RMS-energy baseline แล้ว]
+
+ไฟล์ `src/audio/vad.py`; test ใหม่ `tests/test_vad.py`
+
+```text
+detect_speech_ranges(wav_path) → list[tuple[int, int]]
+speech_overlap_ratio(segment, speech_ranges) → float
+```
+
+รายการเวลาที่คืนเป็น millisecond อิงต้นวิดีโอเดียวกับ SRT
+รวมช่วงเสียงที่ซ้อนกันก่อนคำนวณ overlap เพื่อไม่ให้ ratio เกิน 1
+ถ้าตัด WAV เฉพาะช่วง ต้องบวก offset กลับให้ถูกก่อนส่งให้ pipeline
+
+เริ่มจากอ่าน WAV, แบ่ง window, คำนวณ RMS, threshold และรวมช่วงต่อเนื่อง
+ผล RMS เป็นเพียงช่วงพลังงานเสียงสูง เพลง/เอฟเฟกต์ก็ให้ผลสูงได้ ต้องทดสอบแยกจากเสียงพูดจริง
+เสียง sine สังเคราะห์ใช้ทดสอบการคำนวณพลังงานได้ แต่ไม่ใช่หลักฐานว่า detector แยกคำพูดได้
+
+**ผู้เรียกในอนาคต:** runner สกัด WAV และเรียก detect_speech_ranges ครั้งเดียว;
+attribute_segment เรียก speech_overlap_ratio ต่อบรรทัด
+
+- speech_ranges=None: ยังไม่ได้ประเมิน ไม่ใช่ความเงียบ
+- speech_ranges=[]: ประเมินแล้วไม่พบช่วงเสียงพูดตามวิธีที่ใช้
+- VAD ไม่ได้คืนชื่อตัวละคร และไม่จำเป็นต้องเริ่ม speaker_features/voice embedding ในขั้นนี้
+
+**จบเมื่อ:** ไฟล์เงียบไม่พบช่วงพลังงาน และคลิปที่ติดป้าย speech/music/noise ด้วยมือมีรายงาน false positive/negative ให้เห็น
+
+## 10. คนในภาพกำลังพูดไหม: motion ของปาก
+
+**สถานะ: [มี baseline แล้ว]** `src/vision/active_speaker.py`
+**test ใหม่:** `tests/test_active_speaker.py`
+
+ภาพกระจาย 5 เฟรมจากบท 5 เหมาะกับการจำตัวละคร แต่ไม่พอให้สรุปการเคลื่อนไหวปากต่อเนื่อง
+เพิ่มวิธีอ่านช่วงถี่แยกต่างหากใน video_sampler โดยมีขอบเขตจำนวนเฟรม/เวลา
+
+```text
+sample_mouth_frames(video_path, segment, sample_fps=8, max_seconds=10)
+  → list[FrameSample]
+
+score_active_speakers(samples, tracks, speech_ranges)
+  → dict[int, float | None]   # track_id → active_speaker_score
+```
+
+8 fps/10 วินาทีถูกใช้ใน implementation แล้ว แต่ยังเป็นค่าทดลอง ไม่ใช่ค่าที่รับประกันความแม่นยำ
+หาก segment ยาวเกินขอบเขต ให้แบ่งเป็นหน้าต่างจำกัดงานและบันทึกว่าประเมินช่วงไหน
+
+**ผู้คุมคือ speaker_attribution:**
+
+1. อ่านเฟรมถี่เฉพาะช่วงมีหลักฐานการพูด
+2. detect/track บนเฟรมชุดนี้ด้วย ห้ามเอากล่องจาก sparse samples มาใช้ผิดเฟรม
+3. จับคู่ track ระหว่างหลักฐานตัวตนกับปากอย่างชัดเจน หรือคำนวณทั้งสองจาก track ชุดเดียวกัน
+4. active_speaker ตัดบริเวณปาก เปรียบเทียบ grayscale frame difference/optical flow
+5. ลดผลจากการเลื่อนหัว/กล้องหรือฉากตัดก่อนใช้ motion เป็นหลักฐาน
+6. เทียบเวลาปากขยับกับช่วงเสียง แล้วคืนคะแนนพร้อมหลักฐานที่ตรวจสอบได้
+
+ถ้ามีเฟรมไม่พอหรือเลือกปากไม่ได้ ให้คืน None สำหรับ track นั้น ไม่ใช้ 0.0 แทน “ไม่รู้”
+อย่า normalize ให้คนที่ปากนิ่งทั้งหมดมีผู้ชนะ 1.0 เพียงเพราะมีการเคลื่อนเล็กน้อยมากที่สุด
+
+**จบเมื่อ:** คลิปที่ทราบว่าคนหนึ่งขยับปากให้คะแนนสมเหตุผล และกรณีประเมินไม่ได้ไม่ถูกแปลว่าไม่พูด
+
+<a id="fusion"></a>
+
+## 11. รวมหลักฐานและตัดสินผู้พูด
+
+**สถานะ: [มี baseline แล้ว]** `src/pipeline/confidence_scoring.py` กับ `speaker_attribution.py`
+**test:** `tests/test_confidence_scoring.py` มีโครงแล้ว และเพิ่ม test ของ orchestration
+
+### 11.1 จุดเริ่มของ workflow เต็ม [API เสนอ]
+
+```text
+attribute_segment(video_path, segment, identifier, speech_ranges=None)
+  → AttributionResult
+```
+
+ผู้เรียกโหลด identifier และเตรียม speech_ranges มาก่อนเพื่อใช้ซ้ำ
+attribute_segment คุมการเลือกเฟรม, detector/tracker, collect_visual_candidates,
+active speaker และ confidence scoring ไม่ย้ายสูตรทั้งหมดมาเขียนรวมในฟังก์ชันเดียว
+
+### 11.2 กำหนดเงื่อนไข “จะตรวจเมื่อไร” ให้ตรงโจทย์
+
+ข้อเสนอนี้ใช้ **หลักฐานเสียงหรือสคริปต์** ไม่บังคับว่าต้องผ่าน VAD ก่อนทุกกรณี:
+
+| สถานการณ์ | การทำงานที่เสนอ |
 |---|---|
-| `subtitle_io.py` | parse เวลา, UTF-8 ไทย, blank character, malformed SRT |
-| `extractor.py` | ROI ว่างคืน `None`, histogram รวมเป็น 1.0 |
-| `matcher.py` | feature เดียวกันได้ score 1.0, feature ว่างได้ 0.0 |
-| `video_sampler.py` | ไม่เกิน `MAX_FRAMES_PER_SEGMENT`, read fail ไม่ loop |
-| `character_tracking.py` | box ทับกันได้ track ID เดิม |
-| `vad.py` | silent WAV ไม่เป็น speech, synthetic tone/speech sample มีช่วง output |
-| `confidence_scoring.py` | ทุกกรณี DEFAULT/UNKNOWN/ACCEPTED/SCRIPT_CONFLICT |
+| มีบทพูด แต่ชื่อว่าง | ตรวจภาพตามช่วงเวลานั้น แล้วรวบรวมหลักฐานผู้พูด |
+| ไม่มีบท แต่มี speech range | วิเคราะห์ช่วงจากเสียงได้ แต่ต้องสร้าง segment จากช่วงนั้นก่อน; ยังไม่ใช่การถอดเสียงอัตโนมัติ |
+| มีชื่อในสคริปต์ | เก็บชื่อเดิมเป็นหลักฐาน/คำตอบที่ผู้ใช้ใส่; โหมดตรวจสอบค่อยแจ้งความขัดแย้ง |
+| VAD ยังไม่รัน | ถือว่าเสียงไม่ทราบ ไม่ติด NO_SPEECH |
+| VAD ไม่พบคำพูด แต่มีข้อความบทพูด | เก็บความขัดแย้งให้ตรวจต่อ อาจเวลาเหลื่อมหรือ VAD พลาด ไม่ข้ามเงียบ ๆ |
+| ไม่มีทั้งบทและหลักฐานเสียง | ไม่ต้องจับคู่ภาพเพื่อเดาผู้พูด |
 
-อย่าพึ่งวัด accuracy ทั้งระบบจนกว่าจะทดสอบ unit เล็ก ๆ ผ่าน เพราะจะแยกไม่ออกว่า bug อยู่ที่ parser, detector, feature หรือ scoring
+การมี text เป็นสัญญาณเริ่มตรวจ ไม่ได้ยืนยันว่าตัวละครที่มองเห็นคือคนพูด
+ซับที่มีเครื่องหมายเพลง/เอฟเฟกต์ชัดเจนถูกข้ามด้วย is_non_dialogue; input เสียงล้วนใช้ segments_from_speech_ranges ใน audio/vad.py โดยไม่สร้าง transcript
 
----
-
-## 15. Checklist ก่อนเริ่มรันคลิปจริง
-
-- [ ] มี `SubtitleSegment` ที่ valid
-- [ ] มี SRT test ที่อ่านได้จริง
-- [ ] มี reference images แยกโฟลเดอร์
-- [ ] สร้าง database สำเร็จ
-- [ ] visual matcher คืน top-3 จากภาพนิ่งได้
-- [ ] frame sampler ไม่เกินจำนวนที่ config กำหนด
-- [ ] VAD ส่งกลับช่วงเวลาเป็น millisecond
-- [ ] ไม่มี loop อ่านวิดีโอแบบไม่มี break หรือ max count
-- [ ] ผลแต่ละแถวเป็น Character / UNKNOWN / DEFAULT พร้อม status
-- [ ] JSON export เก็บ evidence
-- [ ] ค่อยเชื่อมกับ UI
-
----
-
-## เส้นทาง MVP ที่ควรหยุดเพื่อส่งงานได้
-
-ถ้าเวลาจำกัด ให้ทำถึงตรงนี้ก่อน:
+### 11.3 คะแนนที่ไม่มีข้อมูลต้องไม่กลายเป็นศูนย์
 
 ```text
-models → SRT parser → reference database → manual head ROI
-→ visual matcher → frame sampler → DEFAULT/UNKNOWN rule → JSON export
+calculate_script_score(candidate_name, script_character)
+  → float | None
+
+combine_scores(visual_score, active_speaker_score, script_score)
+  → float
 ```
 
-MVP นี้มีแก่น Image Processing ชัดเจน: HSV, histogram, KMeans, ROI, multi-frame aggregation และ confidence score แม้จะยังไม่มี active speaker จากปาก
+- ไม่มีชื่อในสคริปต์ → script_score=None
+- มีชื่อและตรง → 1.0; มีชื่อแต่ไม่ตรง → 0.0 เป็นหลักฐานขัดแย้ง
+- ยังไม่มีผลปาก → active_speaker_score=None
+- ไม่เอา None ไปบวกหรือเปลี่ยนเป็นศูนย์โดยไม่อธิบาย
 
-จากนั้นเพิ่มตามลำดับ:
+ถ้าหลักฐานครบ น้ำหนักเริ่มต้นที่อยู่ใน config คือ:
 
 ```text
-face detection/tracking → VAD → mouth motion → fusion score → UI review
+final = 0.50 * visual + 0.35 * active_speaker + 0.15 * script
+ตัวอย่าง: 0.50*0.88 + 0.35*0.76 + 0.15*1.0 = 0.856
 ```
 
-อย่าเริ่ม `speaker_features.py` ในรอบแรก เพราะ voice embedding และ diarization ต้องมี reference voice/dataset เพิ่ม และไม่จำเป็นต่อ MVP นี้
+หากใช้เฉพาะหลักฐานที่มี อาจหารด้วยผลรวมน้ำหนักที่มีเพื่อเทียบในช่วง 0–1
+แต่ต้องบันทึกว่าใช้หลักฐานอะไร และตั้งกฎ coverage แยก: ภาพอย่างเดียวได้คะแนนสูงก็ยังไม่ยืนยันผู้พูด
+อย่าใช้ ACCEPT_SCORE เดียวกับทุกชุดหลักฐานโดยไม่ตรวจด้วยชุด validation
 
-## เมื่อคุณติดขัด ให้ส่งอะไรมาให้ช่วยตรวจ
+### 11.4 แยก DEFAULT กับ UNKNOWN และ error
 
-ส่งเพียง 4 อย่างนี้ก็เพียงพอ:
+- ไม่พบคนในภาพที่อ่านและตรวจสำเร็จ ขณะมี cue จากบท/เสียง → DEFAULT ตามนโยบายที่ตั้งไว้
+- พบคนแต่ reference ไม่ตรง/อันดับสูสี/หลักฐานไม่พอ → UNKNOWN ให้คนตรวจ
+- วิดีโออ่านล้มเหลวหรือ detector error → รายงาน error/review ไม่อ้างว่าไม่มีคนแล้วตั้ง DEFAULT
+- ไม่มี speech และไม่มี dialogue cue หลังตรวจแล้ว → NO_SPEECH หรือข้ามตามชนิด input
+- หลักฐานพอและผ่านเกณฑ์ของนโยบาย → ACCEPTED
+- ชื่อสคริปต์กับหลักฐานขัดแย้ง → เก็บ SCRIPT_CONFLICT/ส่งให้ตรวจ ไม่เขียนทับชื่อที่ผู้ใช้ยืนยัน
 
-1. โค้ดของไฟล์ที่กำลังเขียน
-2. input ตัวอย่างเล็ก ๆ (เช่น SRT 2 blocks หรือ print output)
-3. error traceback เต็ม ๆ
-4. สิ่งที่คาดหวังเทียบกับผลที่ได้จริง
+ชื่อ status เหล่านี้ implement แล้วใน confidence_scoring/speaker_attribution พร้อม tests; เพิ่ม NO_CUE/NON_DIALOGUE/SCRIPT_PROVIDED ตามคำอธิบายใน USER_GUIDE_TH.md
+AttributionResult ต้องเก็บ segment_id, candidates และ evidence ว่าเลือกชื่อนี้จาก track/เฟรม/ช่วงเสียงไหน
 
-เราจะตรวจทีละ module โดยไม่กระโดดไปแก้ UI หรือเพิ่ม feature อื่นก่อน
+**จบเมื่อ:** ทดสอบกรณีขอบได้ด้วยข้อมูลจำลองโดยไม่เปิดวิดีโอ และแยก “ไม่รู้”, “ไม่พบ”, “ประมวลผลผิดพลาด” ได้
+
+## 12. Export ก่อนต่อหน้าจอ
+
+**สถานะ: [มีแล้ว]** `src/io/result_export.py`
+**test ใหม่:** `tests/test_result_export.py`
+
+```text
+export_results_json(segments, results, output_path) → Path
+export_labelled_srt(segments, results, output_path) → Path
+```
+
+ผู้เรียกคือ runner/ปุ่ม Export ไม่ใช่ matcher
+จับคู่ segment กับ result ด้วย segment_id ไม่พึ่งลำดับ list เพียงอย่างเดียว
+ให้ JSON เก็บเวลา ข้อความ ชื่อ คะแนน status และ evidence; SRT เป็นฉบับแสดงข้อความพร้อมชื่อ
+
+Candidate/AttributionResult เป็น dataclass จึงแปลงด้วย dataclasses.asdict ได้
+None แปลงเป็น null ใน JSON; อย่าแนบ raw frame หรือ NumPy histogram ทั้งก้อนเป็น evidence โดยไม่ออกแบบ serialization
+แยก detected_character ออกจาก manual_character เมื่อเพิ่มการแก้มือภายหลัง
+manual_character มีใน AttributionResult แล้ว; GUI รักษาค่านี้จากผลเดิมก่อนรับผลการรันใหม่
+
+**จบเมื่อ:** เขียนแล้วอ่าน JSON กลับได้ และ SRT ไม่ทำเวลา/ข้อความเดิมหาย
+เลือก output ใหม่แยกจาก subtitle ต้นฉบับ
+
+## 13. ค่อยต่อ UI กับของที่ทดสอบแล้ว
+
+**สถานะ: [มีแล้ว]** `src/main.py` + `src/ui/worker.py` + `src/ui/widgets.py`
+Import/Preview/Analyze/Cancel/Export เชื่อมแล้ว งานหนักอยู่ใน worker
+
+| เมธอด/ปุ่มใน UI | สิ่งที่จะเรียก | สิ่งที่ทำกับ return |
+|---|---|---|
+| import_speech_ranges | `io/subtitle_io.py:parse_srt(path)` มีแล้ว | เก็บ segments แล้วเติมเวลา/text/ชื่อเดิมในตาราง |
+| Run/worker | `VisualIdentifier.from_database()` มีแล้ว | สร้างหนึ่ง instance ต่อการรัน |
+| Run/worker | `extract_audio` มีแล้ว + `detect_speech_ranges` ยังต้องเขียน | เตรียมเสียงครั้งเดียว |
+| Run/worker วน segment | `attribute_segment(...)` ยังต้องเขียน | ส่ง AttributionResult กลับมาทาง signal |
+| Export | `export_results_json/export_labelled_srt` ยังต้องเขียน | แสดงตำแหน่งไฟล์ที่บันทึก |
+
+ทำงานหนักใน worker/QThread แล้วแก้ Qt widgets บน UI thread
+มี Cancel/progress และตรวจสัญญาณยกเลิกระหว่างงานที่มีขอบเขต ไม่สร้าง thread ใหม่ต่อภาพ
+การแยกเป็น module ไม่ได้ทำให้ asynchronous อัตโนมัติ: extract_audio ปัจจุบันยังรอ FFmpeg จบก่อนคืนค่า
+หากผู้ใช้แก้ชื่อเองต้องเก็บแยก และ Run รอบใหม่ไม่เขียนทับคำตอบยืนยันโดยไม่ตั้งใจ
+
+**จบเมื่อ:** UI ไม่ค้างระหว่างงาน ผู้ใช้แก้/ตรวจผลได้ และ Cancel หยุดการส่งงานใหม่ได้
+
+<a id="verification"></a>
+
+## 14. ประสิทธิภาพและการทดสอบที่ต้องทำควบคู่
+
+### 14.1 ค่าตั้งต้นไม่ได้แปลว่าบังคับใช้แล้ว
+
+| ค่าใน config | สถานะปัจจุบัน |
+|---|---|
+| native thread environment defaults | ตั้งผ่าน package init ก่อนโมดูลของโปรเจกต์โหลด library |
+| CV_THREADS | CLI/UI เรียก cv2.setNumThreads แล้ว; ผู้ใช้ library โดยตรงต้องจัด runtime ของตน |
+| FFMPEG_THREADS | ใช้ใน extract_audio แล้ว |
+| WEIGHT_HISTOGRAM / WEIGHT_DOMINANT_COLOR | ใช้จริงใน color_similarity |
+| MAX_FRAME_WIDTH / MAX_FRAMES_PER_SEGMENT | sampler/identity observation sampling ใช้แล้ว |
+| MAX_KMEANS_PIXELS | ยังไม่ถูกนำไปจำกัด pixel; KMeans ปัจจุบันใช้ทุก pixel ที่ผ่าน mask |
+| MAX_SECONDS_PER_SEGMENT | pipeline แบ่งหน้าต่างและ dense sampler จำกัดแล้ว |
+| MIN_VISUAL_SCORE / ACCEPT_SCORE / final weights | ใช้ใน confidence pipeline; ยังต้องวัด/ปรับ threshold |
+
+จำกัด thread ช่วยควบคุมการทำงานพร้อมกัน ส่วนการลดจำนวนเฟรม/พิกเซลและไม่ทำงานซ้ำช่วยลดปริมาณงานจริง
+constants ไม่ใช่เพดาน CPU/RAM ของ Python และการทดสอบภาพเล็กไม่ได้รับประกันว่าคลิปยาวจะไม่ร้อน
+
+เมื่อเพิ่ม pixel sampling ให้ทำใน hair_features โดยเลือกตัวอย่างอย่างทำซ้ำได้
+ใช้กฎเดียวกันทั้ง reference/query, rebuild ฐาน และเปรียบเทียบความแม่นยำก่อน–หลัง
+ไม่ต้องเพิ่มเสียง/ทรงผม/โมเดลใหม่เพื่อแก้โครงสร้างในครั้งเดียว
+
+### 14.2 Test ที่มีอยู่แล้ว กับที่ต้องเพิ่ม
+
+| ชุดทดสอบ | สถานะ / ครอบคลุม |
+|---|---|
+| test_reference_workflow.py | มีแล้ว: build/load/identify, PKL เก่า, crop/mask, config, failure ที่ไม่ทำฐานหาย |
+| test_visual_matcher.py | มีแล้ว: ranking, query ว่าง, top_k และคะแนนที่ยังไม่ประเมิน |
+| test_subtitle_io.py | มีแล้ว: ซับตัวอย่างเล็ก ชื่อว่าง/ชื่อระบุ เวลาไม่ถูกต้อง |
+| test_reference_sources.py | มีแล้ว: mock URL/AniList ไม่เรียก network จริง |
+| test_audio_extract.py | มีแล้ว: mock FFmpeg ขอบเขตคำสั่ง/ข้อผิดพลาด ไม่ยืนยันคุณภาพเสียงจริง |
+| test_video_sampler.py | มีแล้ว: จำนวนเฟรม, resize, อ่านไม่สำเร็จ, release |
+| test_face_detect.py / test_character_tracking.py | มีแล้ว: box contract และ track ID |
+| test_vad.py / test_active_speaker.py | มีแล้ว: energy/timing/missing evidence; คุณภาพ speech/music ต้องวัดจาก labels |
+| test_speaker_attribution.py | มีแล้ว: ใช้ track/ช่วงเวลาเดียวกัน, script/audio cue, error ไม่กลายเป็น DEFAULT |
+| test_confidence_scoring.py | มีแล้ว: กฎยอมรับ/margin/conflict/coverage |
+| test_result_export.py | มีแล้ว: round-trip JSON และรักษาเวลา/text |
+
+รันเฉพาะชุดที่เกี่ยวข้องระหว่างเขียน และรัน discover ก่อนเชื่อมโมดูล
+อย่าเอา test ที่ใช้รูปเดียวกับ reference ไปอ้างเป็น accuracy ทั้งระบบ
+
+### 14.3 ผลตรวจเอกสารรอบนี้ — 11 ตุลาคม 2026
+
+- เทียบชื่อฟังก์ชันและทางเรียกในคู่มือกับ source; API ในอนาคตแยกเป็นข้อเสนอ
+- รัน `venv/bin/python -B -m unittest discover -s tests -v` ผ่าน 28 tests
+- รัน Python ตัวอย่างครบ 4 บล็อกในบท 1, 2 และ 4 ได้: model, โหลดฐาน, จับคู่ภาพ และอ่าน SRT
+- ฐานในเครื่องมี 4 ตัวละคร / 9 reference: Aqua 3, Ruby 4, Gilgamesh 1, Richard I 1
+- ตัวอย่าง Aqua ให้ Aqua เป็นอันดับแรก 47.6%; เป็นภาพในฐาน ใช้ตรวจการต่อสาย ไม่ใช่ผล accuracy
+- ไฟล์ซับ Test_1 ที่มีอยู่ในเครื่องอ่านได้ 23 segments; จำนวนนี้เป็น snapshot ของไฟล์ปัจจุบัน
+- ตรวจลิงก์ภายใน/anchor และ syntax ของบล็อก Python; checksum ของ PKL ก่อน–หลังตรงกัน ไม่ได้ rebuild ฐานจริง
+
+ขอบเขต: tests ของ network/FFmpeg ใช้ mock ไม่ได้ยืนยัน API จริงหรือคุณภาพเสียงจริง
+รอบนี้ไม่ได้เปิดทดสอบหน้าจอหรือรันวิดีโอครบวงจร ซึ่ง pipeline ยังไม่ถูก implement
+
+## 15. ถ้ากลับมาเปิดโปรเจกต์วันนี้ ให้ทำตามนี้
+
+1. อ่านบท 0 และเปิด FUNCTION_FLOW_TH.md ข้าง code editor
+2. รันตัวอย่างบท 2 และ 4: ดูจำนวน reference, ranking และ SRT โดยไม่ rebuild ฐาน
+3. เปิด VisualIdentifier แล้วตาม import ไปจนถึง color_similarity เพื่อเห็นการเรียกจริง
+4. อ่าน video_sampler.py ตามบท 5 และลอง subtitle หนึ่งช่วงจาก Test_1
+5. ใช้ face box กำหนดมือบนเฟรมที่ได้ แล้วเรียก identifier ตัวเดิม
+6. อ่าน detector/tracker/เสียง/ปาก/fusion ที่ implement แล้วตามบทถัดไป และเทียบผลกับคำตอบที่ติดป้ายเอง
+
+### Checklist สถานะปัจจุบัน
+
+- [x] มี data contract และ config
+- [x] มี SRT parser ที่เรียกแยกจาก UI ได้
+- [x] มี enrollment / PKL loader-writer
+- [x] มี crop / colour features / pair similarity / visual ranking
+- [x] มีตัวคุมภาพนิ่ง VisualIdentifier
+- [x] มี audio extraction สำหรับ waveform/เตรียม VAD
+- [ ] ประเมินภาพใหม่จาก Test_1 และจดผลกับคำตอบจริง
+- [x] video sampler ที่จำกัดงาน
+- [x] face detection และ tracking พร้อม preview; การป้อน face box เองยังใช้ API
+- [x] คะแนนตัวตนที่รวมหลายเฟรมต่อ track
+- [x] RMS-energy baseline และ mouth-motion evidence (ยังต้องวัด accuracy)
+- [x] กฎ script/audio cue และ confidence fusion
+- [x] JSON/SRT export
+- [x] เชื่อม UI ผ่าน worker พร้อม Cancel
+- [ ] วัดผลกับช่วงซับที่ติดป้ายด้วยมือและรายงานข้อจำกัด
+
+เป้าหมายแรกคือพิสูจน์ “ภาพเฟรมหนึ่งช่วง → คนที่มองเห็น → คะแนนความคล้าย” ให้ตรวจสอบได้
+เมื่อเชื่อมหลักฐานบท/เสียงแล้วจึงทดสอบ “ใครพูด” แยกอีกขั้น
+หากทำไม่ครบก่อนส่งงาน ให้ระบุขอบเขตที่ทำจริง ไม่ใช้ชื่อ speaker detection แทนผลที่ยังเป็น visual identity อย่างเดียว

@@ -1,0 +1,11 @@
+# เวอร์ชันที่ตรวจใน venv ของโปรเจกต์นี้; FFmpeg เป็นโปรแกรมภายนอก ไม่ใช่ pip package
+numpy==2.5.3
+opencv-python==5.0.0.93
+scipy==1.18.1
+scikit-learn==1.9.1
+requests==2.34.2
+PyQt6==6.11.0
+ultralytics==8.4.150
+torch==2.14.0
+Pillow==12.3.0
+filelock==3.32.6
