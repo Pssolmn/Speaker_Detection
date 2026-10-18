@@ -22,6 +22,7 @@ from src.io.result_export import export_results_json, export_labelled_srt, forma
 from src.io.subtitle_io import parse_srt
 from src.pipeline.workspace_scan import ScanSettings, scan_visual
 from src.workspace.attribution import subtitle_results, suggest_links
+from src.workspace.clustering import cluster_observations, cosine_distances, reset_unlocked_memberships
 from src.workspace.store import WorkspaceStore
 from src.ui.studio_layout import build_studio
 from src.ui.waveform_worker import WaveformWorker
@@ -296,8 +297,9 @@ class WorkspaceWindow(ProjectNavigation, QMainWindow):
 
     def filter_subtitles(self, *args):
         query = self.subtitle_search.text().strip().casefold()
+        # รวมคอลัมน์สถานะ (7) กับบทพูด (8) ด้วย ไม่งั้นค้นหา "หลายเสียง"/"MULTIPLE_SPEAKERS" ไม่เจอ
         for row in range(self.subtitle_table.rowCount()):
-            text = " ".join(self.subtitle_table.item(row, col).text() for col in (0, 3, 4)
+            text = " ".join(self.subtitle_table.item(row, col).text() for col in (0, 3, 4, 7, 8)
                             if self.subtitle_table.item(row, col))
             self.subtitle_table.setRowHidden(row, query not in text.casefold())
 
@@ -429,6 +431,9 @@ class WorkspaceWindow(ProjectNavigation, QMainWindow):
         self.media_id = self.episodes.currentData()
         self.activate_media()
         visible_kind = "voice" if self.profile_kind.currentIndex() == 2 else "visual"
+        kind_profiles = self.store.profiles(visible_kind)
+        confirmed_count = sum(1 for item in kind_profiles if item["confirmed"])
+        self.confirm_progress.setText(f"ยืนยันแล้ว {confirmed_count}/{len(kind_profiles)} กลุ่ม")
         with QSignalBlocker(self.profiles):
             self.profiles.clear()
             for kind, label in (("visual", "ภาพที่ยังไม่จัดกลุ่ม"), ("voice", "เสียงที่ยังไม่จัดกลุ่ม")):
@@ -437,7 +442,7 @@ class WorkspaceWindow(ProjectNavigation, QMainWindow):
                 item = QListWidgetItem(label)
                 item.setData(Qt.ItemDataRole.UserRole, (kind, None))
                 self.profiles.addItem(item)
-            for profile in self.store.profiles(visible_kind):
+            for profile in kind_profiles:
                 if not profile["count"] and not self.show_empty.isChecked():
                     continue
                 label = "ภาพ" if profile["kind"] == "visual" else "เสียง"
@@ -512,6 +517,8 @@ class WorkspaceWindow(ProjectNavigation, QMainWindow):
             return
         visual_id = visual_id or self.choose_profile("visual")
         if not visual_id:
+            # เลือกไม่สำเร็จ/ยกเลิกตอนเลือกตัวละครเอง ต้องบอกด้วย ไม่งั้นดูเหมือนยืนยันไปแล้วทั้งที่ไม่ได้ผูกอะไรเลย
+            self.message.setText("ยกเลิกแล้ว · ยังไม่ได้ผูกเสียงกับตัวละคร")
             return
         voice, visual = self.store.profile(voice_id), self.store.profile(visual_id)
         old = self.store.rows("SELECT visual_id FROM links WHERE voice_id=?", (voice_id,))
@@ -526,6 +533,9 @@ class WorkspaceWindow(ProjectNavigation, QMainWindow):
             self.store.link(voice_id, visual_id, replace=True)
             self.refresh()
             self.message.setText("ผูกแล้ว · ชื่อและสีอ้างตัวละครเดียวกันทั้งโปรเจกต์ · ไม่เขียนทับชื่อแก้มือเฉพาะบรรทัด")
+        else:
+            # เดิมกดไม่ครบแล้วเงียบ ดูเหมือนผูกสำเร็จทั้งที่ยังไม่ได้ผูกจริง
+            self.message.setText(f"ยกเลิกแล้ว · {voice['name']} ยังไม่ได้ผูกกับ {visual['name']}")
 
     def review_pair(self, candidate):
         example = candidate["examples"][0]
@@ -553,6 +563,16 @@ class WorkspaceWindow(ProjectNavigation, QMainWindow):
     def current_profile(self):
         item = self.profiles.currentItem()
         return item.data(Qt.ItemDataRole.UserRole) if item else (None, None)
+
+    def selected_profiles(self):
+        # กันรายการพิเศษ "ยังไม่ได้จัดกลุ่ม" (identifier เป็น None) ไม่ให้ปนเข้ามาตอนเลือกหลายกลุ่ม
+        seen, result = set(), []
+        for item in self.profiles.selectedItems():
+            kind, identifier = item.data(Qt.ItemDataRole.UserRole)
+            if identifier and identifier not in seen:
+                seen.add(identifier)
+                result.append((kind, identifier))
+        return result
 
     def select_episode(self, index):
         if not self.resolve_draft():
@@ -707,18 +727,29 @@ class WorkspaceWindow(ProjectNavigation, QMainWindow):
             return
         self._observations = self.store.observations(profile_id=identifier, kind=kind)
         if identifier is None:
-            self._observations = [item for item in self._observations if item["profile_id"] is None]
+            # ที่ตัดออก (reject) ก็ profile_id เป็น None เหมือนกัน แต่ไม่ใช่ของค้างให้จัดกลุ่ม ไม่ต้องมาปนที่นี่
+            # เว้นแต่ติ๊ก "แสดงที่ตัดออกไว้ด้วย" เพื่อย้อนดู/ย้ายกลับ
+            self._observations = [item for item in self._observations if item["profile_id"] is None
+                                  and (item["state"] != "rejected" or self.show_rejected.isChecked())]
+        self._observations_by_id = {item["id"]: item for item in self._observations}
         episodes = {item["id"]: item["title"] for item in self.store.media()}
         unused = (unused_visual_ids(self.store, self._observations)
                  if kind == "visual" and self.hide_unused.isChecked() else set())
         with QSignalBlocker(self.observations):
+            sorting = self.observations.isSortingEnabled()
+            self.observations.setSortingEnabled(False)
             replace_table_rows(self.observations, len(self._observations))
             for row, item in enumerate(self._observations):
                 values = [episodes[item["media_id"]], format_srt_time(item["start_ms"]), format_srt_time(item["end_ms"]),
                           "—" if item["score"] is None else f"{item['score']:.3f}", item["state"]]
                 for column, value in enumerate(values):
-                    self.observations.setItem(row, column, QTableWidgetItem(value))
+                    cell = QTableWidgetItem(value)
+                    if column == 0:
+                        # ใช้ ID แทน row index เพราะเปิด sort ไว้ ลำดับแถวเปลี่ยนได้โดยไม่สัมพันธ์กับ self._observations แล้ว
+                        cell.setData(Qt.ItemDataRole.UserRole, item["id"])
+                    self.observations.setItem(row, column, cell)
                 self.observations.setRowHidden(row, item["id"] in unused)
+            self.observations.setSortingEnabled(sorting)
         self.preview.clear()
         self.profile_info.setText("เลือกช่วงเพื่อดูหลักฐาน · คะแนนเป็นความคล้าย ไม่ใช่โอกาสถูกต้อง"
                                   + (f" · ซ่อนไว้ {len(unused)} ช่วงที่ไม่ทับเสียง/ซับ" if unused else ""))
@@ -735,7 +766,126 @@ class WorkspaceWindow(ProjectNavigation, QMainWindow):
                                      "\nข้อเสนอจากภาพ/เสียง/ซับ (ยังไม่ยืนยัน): " + (", ".join(suggestions) or "หลักฐานไม่พอ"))
 
     def selected_observations(self):
-        return [self._observations[item.row()] for item in self.observations.selectionModel().selectedRows()]
+        # ใช้ ID แทน row index เพราะเปิด sort ไว้ ลำดับแถวเปลี่ยนได้โดยไม่สัมพันธ์กับ self._observations แล้ว
+        return [self._observations_by_id[self.observations.item(item.row(), 0).data(Qt.ItemDataRole.UserRole)]
+                for item in self.observations.selectionModel().selectedRows()]
+
+    def delete_selected_observations(self):
+        items = self.selected_observations()
+        if not items:
+            raise ValueError("เลือกช่วงที่จะลบก่อน (Shift/Cmd+คลิกเลือกได้หลายแถว)")
+        locked = [item for item in items if item["locked"]]
+        if locked:
+            raise ValueError(f"มี {len(locked)} ช่วงที่ล็อก/ยืนยันแล้วปนอยู่ในที่เลือก เอาออกจากที่เลือกก่อน")
+        if QMessageBox.question(self, "ลบถาวร",
+                f"ลบ {len(items)} ช่วงที่เลือกไว้ถาวร? กู้คืนไม่ได้ ต้องสแกนใหม่เท่านั้นถ้าต้องการกลับมา",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.No) != QMessageBox.StandardButton.Yes:
+            return
+        self.store.delete_observations([item["id"] for item in items])
+        self.select_profile()
+        self.message.setText(f"ลบไปแล้ว {len(items)} ช่วง")
+
+    def reject_selected_observations(self):
+        items = self.selected_observations()
+        if not items:
+            raise ValueError("เลือกช่วงที่จะตัดออกก่อน (Shift/Cmd+คลิกเลือกได้หลายแถว)")
+        if QMessageBox.question(self, "ตัดออก",
+                f"ตัดออก {len(items)} ช่วงที่เลือกไว้จากการจัดกลุ่ม? ข้อมูลยังเก็บไว้ ย้อนกลับได้ด้วยคำสั่งย้ายช่วง "
+                "แต่ระบบจะไม่เสนอช่วงนี้เข้ากลุ่มไหนอีกจนกว่าจะย้ายเองด้วยมือ",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.No) != QMessageBox.StandardButton.Yes:
+            return
+        self.store.reject_observations([item["id"] for item in items])
+        self.select_profile()
+        self.message.setText(f"ตัดออกแล้ว {len(items)} ช่วง · ย้ายกลับเข้ากลุ่มได้ทีหลังถ้าต้องการ")
+
+    def unassign_selected_observations(self):
+        items = self.selected_observations()
+        if not items:
+            raise ValueError("เลือกช่วงที่จะส่งกลับก่อน (Shift/Cmd+คลิกเลือกได้หลายแถว)")
+        self.store.unassign_observations([item["id"] for item in items])
+        self.select_profile()
+        self.message.setText(f"ส่งกลับไปยังไม่จัดกลุ่มแล้ว {len(items)} ช่วง · recluster รอบถัดไปจะพิจารณาใหม่")
+
+    def play_next_observation(self):
+        self._play_observation_offset(1)
+
+    def play_previous_observation(self):
+        self._play_observation_offset(-1)
+
+    def _play_observation_offset(self, step):
+        count = self.observations.rowCount()
+        if not count:
+            raise ValueError("ไม่มีช่วงในรายการนี้")
+        start = self.observations.currentRow()
+        for offset in range(1, count + 1):
+            row = (start + step * offset) % count
+            if not self.observations.isRowHidden(row):
+                self.observations.selectRow(row)
+                self.play_observation()
+                return
+        raise ValueError("ไม่มีช่วงที่แสดงอยู่ให้เล่น")
+
+    def reject_unused_observations(self):
+        kind, _ = self.current_profile()
+        if kind != "visual":
+            raise ValueError("ใช้ได้เฉพาะรายการภาพ (แนวคิด \"ไม่ทับเสียง/ซับ\" ใช้กับภาพเท่านั้น)")
+        unused = unused_visual_ids(self.store, self._observations)
+        if not unused:
+            raise ValueError("ไม่มีช่วงที่เข้าเกณฑ์ไม่ทับเสียงพูด/ซับเลยในรายการนี้")
+        if QMessageBox.question(self, "ตัดออกทั้งหมด",
+                f"ตัดออก {len(unused)} ช่วงที่ไม่ทับเสียงพูด/ซับเลยในรายการนี้? ย้อนกลับได้ด้วยคำสั่งย้ายช่วงทีหลัง",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.No) != QMessageBox.StandardButton.Yes:
+            return
+        self.store.reject_observations(list(unused))
+        self.select_profile()
+        self.message.setText(f"ตัดออกแล้ว {len(unused)} ช่วงที่ไม่ทับเสียง/ซับ")
+
+    def recluster_from_confirmed(self):
+        if not self.store:
+            raise ValueError("เปิดโปรเจกต์ก่อน")
+        kind = "voice" if self.profile_kind.currentIndex() == 2 else "visual"
+        threshold, ok = QInputDialog.getDouble(self, "จัดกลุ่มใหม่จากที่ยืนยันแล้ว",
+            f"เกณฑ์ระยะห่าง ({'เสียง' if kind == 'voice' else 'ภาพ'}) — ต่ำ = เข้มงวดขึ้น (แยกมากขึ้น), "
+            "สูง = หลวมขึ้น (รวมมากขึ้น)", 0.45 if kind == "voice" else 0.20, 0.01, 2.0, 2)
+        if not ok:
+            return
+        if QMessageBox.question(self, "จัดกลุ่มใหม่",
+                "ล้างการจัดกลุ่มของช่วงที่ยังไม่ยืนยันทั้งหมด แล้วจัดใหม่โดยเทียบกับกลุ่มที่ยืนยันแล้วเป็นหลัก? "
+                "กลุ่มที่ยืนยัน/ล็อกแล้วจะไม่ถูกแตะเลย",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.No) != QMessageBox.StandardButton.Yes:
+            return
+        before = len(self.store.profiles(kind))
+        reset = reset_unlocked_memberships(self.store, kind)
+        if kind == "voice":
+            distance_fn = cosine_distances
+        else:
+            from src.vision.character_embedding import CharacterEncoder
+            distance_fn = CharacterEncoder().distances
+        with self.store.lock:
+            cluster_observations(self.store, kind, distance_fn, threshold, margin=.05)
+        after = len(self.store.profiles(kind))
+        self.refresh()
+        self.message.setText(f"จัดกลุ่มใหม่แล้ว {reset} ช่วง · {before} → {after} กลุ่ม")
+
+    def select_next_unconfirmed(self):
+        kind, _ = self.current_profile()
+        kind = kind or ("voice" if self.profile_kind.currentIndex() == 2 else "visual")
+        confirmed = {item["id"]: item["confirmed"] for item in self.store.profiles(kind)}
+        count = self.profiles.count()
+        if not count:
+            raise ValueError("ไม่มีกลุ่มในรายการนี้")
+        start = self.profiles.currentRow()
+        for offset in range(1, count + 1):
+            row = (start + offset) % count
+            item_kind, identifier = self.profiles.item(row).data(Qt.ItemDataRole.UserRole)
+            if identifier and not confirmed.get(identifier, True):
+                self.profiles.setCurrentRow(row)
+                return
+        raise ValueError("ยืนยันครบทุกกลุ่มแล้ว")
 
     def show_observation(self):
         items = self.selected_observations()
@@ -843,7 +993,8 @@ class WorkspaceWindow(ProjectNavigation, QMainWindow):
         return kind, identifier
 
     def choose_profile(self, kind=None, exclude=None, only_ids=None):
-        items = [item for item in self.store.profiles(kind) if item["id"] != exclude
+        excluded = {exclude} if isinstance(exclude, str) else set(exclude or ())
+        items = [item for item in self.store.profiles(kind) if item["id"] not in excluded
                  and (only_ids is None or item["id"] in only_ids)]
         if not items:
             raise ValueError("ยังไม่มีโปรไฟล์ปลายทางที่เลือกได้")
@@ -876,18 +1027,30 @@ class WorkspaceWindow(ProjectNavigation, QMainWindow):
                     break
 
     def delete_profile(self):
-        _, identifier = self.require_profile()
-        profile = self.store.profile(identifier)
-        if QMessageBox.question(self, "ลบโปรไฟล์", f"ลบโปรไฟล์ {profile['name']}?\nหลักฐานจะกลับไปรายการยังไม่จัดกลุ่ม\nชื่อที่ยืนยันบนซับจะเก็บเป็นชื่อเฉพาะแถว ย้อนกลับได้ด้วย Edit → ย้อนการแก้ล่าสุด",
+        items = self.selected_profiles()
+        if not items:
+            raise ValueError("เลือกโปรไฟล์ที่จัดกลุ่มแล้วก่อน (Shift/Cmd+คลิกเลือกได้หลายกลุ่ม)")
+        names = ", ".join(self.store.profile(identifier)["name"] for _, identifier in items)
+        prompt = (f"ลบโปรไฟล์ {names}?\nหลักฐานจะกลับไปรายการยังไม่จัดกลุ่ม\n"
+                 "ชื่อที่ยืนยันบนซับจะเก็บเป็นชื่อเฉพาะแถว ย้อนกลับได้ด้วย Edit → ย้อนการแก้ล่าสุด" if len(items) == 1 else
+                 f"ลบ {len(items)} โปรไฟล์นี้ ({names})?\nหลักฐานจะกลับไปรายการยังไม่จัดกลุ่ม\n"
+                 "ชื่อที่ยืนยันบนซับจะเก็บเป็นชื่อเฉพาะแถว ย้อนกลับได้ด้วย Edit → ย้อนการแก้ล่าสุด")
+        if QMessageBox.question(self, "ลบโปรไฟล์", prompt,
                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
                 QMessageBox.StandardButton.No) == QMessageBox.StandardButton.Yes:
-            self.store.delete_profile(identifier)
+            for _, identifier in items:
+                self.store.delete_profile(identifier)
             self.refresh()
 
     def confirm(self):
-        _, identifier = self.require_profile()
-        self.store.confirm(identifier)
+        items = self.selected_profiles()
+        if not items:
+            raise ValueError("เลือกโปรไฟล์ที่จัดกลุ่มแล้วก่อน (Shift/Cmd+คลิกเลือกได้หลายกลุ่ม)")
+        for _, identifier in items:
+            self.store.confirm(identifier)
         self.refresh()
+        if len(items) > 1:
+            self.message.setText(f"ยืนยันแล้ว {len(items)} กลุ่ม")
 
     def merge(self):
         kind, source = self.require_profile()
@@ -895,6 +1058,22 @@ class WorkspaceWindow(ProjectNavigation, QMainWindow):
         if target:
             self.store.merge(source, target)
             self.refresh()
+
+    def merge_selected_profiles(self):
+        items = self.selected_profiles()
+        if not items:
+            raise ValueError("เลือกโปรไฟล์ที่จะส่งเข้ากลุ่มอื่นก่อน (Shift/Cmd+คลิกเลือกได้หลายกลุ่ม)")
+        kinds = {kind for kind, _ in items}
+        if len(kinds) > 1:
+            raise ValueError("เลือกโปรไฟล์ชนิดเดียวกัน (ภาพ หรือ เสียง) เท่านั้นในการส่งเข้ากลุ่มอื่นพร้อมกัน")
+        source_ids = [identifier for _, identifier in items]
+        target = self.choose_profile(kinds.pop(), exclude=source_ids)
+        if not target:
+            return
+        for source in source_ids:
+            self.store.merge(source, target)
+        self.refresh()
+        self.message.setText(f"ส่งเข้ากลุ่มอื่นแล้ว {len(source_ids)} กลุ่ม")
 
     def split(self):
         items = self.selected_observations()

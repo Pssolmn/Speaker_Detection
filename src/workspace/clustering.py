@@ -9,6 +9,34 @@ import numpy as np
 from src.core.control import check_cancel
 
 
+def reset_unlocked_memberships(store, kind, media_id=None):
+    """คืนค่า observation ที่ยังไม่ล็อกกลับเป็นยังไม่จัดกลุ่ม ก่อนเรียก cluster_observations() ใหม่
+
+    ไม่แตะอันที่ล็อก/ยืนยันแล้วเด็ดขาด; เก็บกวาดโปรไฟล์ว่างที่ยังไม่ยืนยันซึ่งไม่เหลือสมาชิกแล้วด้วย
+    ใช้ร่วมกันทั้ง scripts/recluster.py (CLI) และปุ่ม "จัดกลุ่มใหม่จากที่ยืนยันแล้ว" ใน GUI
+    """
+    clause = "o.kind=?" + (" AND o.media_id=?" if media_id else "")
+    parameters = (kind, media_id) if media_id else (kind,)
+    affected = store.rows(
+        "SELECT m.observation_id FROM memberships m JOIN observations o ON o.id=m.observation_id "
+        f"WHERE {clause} AND m.locked=0 AND m.profile_id IS NOT NULL", parameters)
+    with store.lock, store.db:
+        store.db.execute(
+            f"UPDATE memberships SET profile_id=NULL,score=NULL,state='pending' WHERE observation_id IN "
+            f"(SELECT o.id FROM observations o WHERE {clause} AND o.id IN "
+            "(SELECT observation_id FROM memberships WHERE locked=0))", parameters)
+        # เก็บกวาดโปรไฟล์ที่ไม่มีสมาชิกเหลือแล้วและยังไม่ยืนยัน ไม่แตะโปรไฟล์ที่ยืนยันแล้วแม้จะว่าง
+        # กันสำรอง: ไม่ลบโปรไฟล์ที่ยังมี link ผูกอยู่เด็ดขาด แม้ confirmed จะหลุดจากที่อื่นมาก็ตาม
+        empty = store.rows(
+            "SELECT p.id FROM profiles p LEFT JOIN memberships m ON m.profile_id=p.id "
+            "WHERE p.kind=? AND p.confirmed=0 "
+            "AND p.id NOT IN (SELECT voice_id FROM links UNION SELECT visual_id FROM links) "
+            "GROUP BY p.id HAVING COUNT(m.observation_id)=0", (kind,))
+        for row in empty:
+            store.db.execute("DELETE FROM profiles WHERE id=?", (row["id"],))
+    return len(affected)
+
+
 def cosine_distances(query, references):
     query = np.asarray(query, np.float32)
     references = np.asarray(references, np.float32)

@@ -17,30 +17,8 @@
 
 import argparse
 
-from src.workspace.clustering import cluster_observations, cosine_distances
+from src.workspace.clustering import cluster_observations, cosine_distances, reset_unlocked_memberships
 from src.workspace.store import WorkspaceStore
-
-
-def reset_unlocked(store, kind, media_id=None):
-    """คืนค่า observation ที่ยังไม่ล็อกกลับเป็นยังไม่จัดกลุ่ม; ไม่แตะอันที่ยืนยัน/ล็อกแล้วเด็ดขาด"""
-    clause = "o.kind=?" + (" AND o.media_id=?" if media_id else "")
-    parameters = (kind, media_id) if media_id else (kind,)
-    affected = store.rows(
-        "SELECT m.observation_id FROM memberships m JOIN observations o ON o.id=m.observation_id "
-        f"WHERE {clause} AND m.locked=0 AND m.profile_id IS NOT NULL", parameters)
-    with store.db:
-        store.db.execute(
-            f"UPDATE memberships SET profile_id=NULL,score=NULL,state='pending' WHERE observation_id IN "
-            f"(SELECT o.id FROM observations o WHERE {clause} AND o.id IN "
-            "(SELECT observation_id FROM memberships WHERE locked=0))", parameters)
-        # เก็บกวาดโปรไฟล์ที่ไม่มีสมาชิกเหลือแล้วและยังไม่ยืนยัน ไม่แตะโปรไฟล์ที่ยืนยันแล้วแม้จะว่าง
-        empty = store.rows(
-            "SELECT p.id FROM profiles p LEFT JOIN memberships m ON m.profile_id=p.id "
-            "WHERE p.kind=? AND p.confirmed=0 GROUP BY p.id HAVING COUNT(m.observation_id)=0", (kind,))
-        for row in empty:
-            store.db.execute("DELETE FROM links WHERE voice_id=? OR visual_id=?", (row["id"], row["id"]))
-            store.db.execute("DELETE FROM profiles WHERE id=?", (row["id"],))
-    return len(affected)
 
 
 def main():
@@ -73,7 +51,7 @@ def main():
             print("เพิ่ม --apply เพื่อให้ทำจริง")
             return
 
-        reset = reset_unlocked(store, args.kind, args.media_id)
+        reset = reset_unlocked_memberships(store, args.kind, args.media_id)
         print(f"ล้างการจัดกลุ่มเดิมของ {reset} observation แล้ว")
 
         if args.kind == "voice":

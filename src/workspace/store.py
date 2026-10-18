@@ -218,6 +218,64 @@ class WorkspaceStore:
                              model_key, vector, preview, _json(evidence or {})))
             self.db.execute("INSERT OR IGNORE INTO memberships(observation_id) VALUES (?)", (identifier,))
 
+    def delete_observations(self, observation_ids):
+        """ลบ observation ถาวร (ไม่อยู่ใน undo history เพราะเก็บเฉพาะข้อมูลแก้มือ ไม่เก็บเวกเตอร์ขนาดใหญ่)
+
+        ปฏิเสธถ้ามีช่วงที่ล็อก/ยืนยันแล้วปนอยู่ กันลบหลักฐานที่ตรวจยืนยันไปแล้วโดยไม่ตั้งใจ
+        """
+        identifiers = list(dict.fromkeys(observation_ids))
+        if not identifiers:
+            raise ValueError("Select at least one observation")
+        rows = self.rows("SELECT o.id,o.preview,m.locked FROM observations o "
+                         "JOIN memberships m ON m.observation_id=o.id WHERE o.id IN ({})"
+                         .format(",".join("?" * len(identifiers))), identifiers)
+        if len(rows) != len(identifiers):
+            raise KeyError("Unknown observation")
+        if any(row["locked"] for row in rows):
+            raise ValueError("เลือกมีช่วงที่ล็อก/ยืนยันแล้วปนอยู่ ยกเลิกล็อกก่อนหรือเลือกเฉพาะช่วงที่ยังไม่ยืนยัน")
+        with self.lock, self.db:
+            self.db.execute(f"DELETE FROM memberships WHERE observation_id IN ({','.join('?' * len(identifiers))})",
+                            identifiers)
+            self.db.execute(f"DELETE FROM observations WHERE id IN ({','.join('?' * len(identifiers))})",
+                            identifiers)
+        for row in rows:
+            if row["preview"]:
+                (self.root / row["preview"]).unlink(missing_ok=True)
+
+    def _validated_observation_ids(self, observation_ids):
+        identifiers = list(dict.fromkeys(observation_ids))
+        if not identifiers:
+            raise ValueError("Select at least one observation")
+        placeholders = ",".join("?" * len(identifiers))
+        found = {row["id"] for row in self.rows(f"SELECT id FROM observations WHERE id IN ({placeholders})", identifiers)}
+        missing = [item for item in identifiers if item not in found]
+        if missing:
+            raise KeyError(f"Unknown observation: {missing[0]}")
+        return identifiers
+
+    def reject_observations(self, observation_ids):
+        """ทำเครื่องหมายว่า 'ไม่ใช่หลักฐานที่ใช้ได้' แทนการลบถาวร — ย้อนกลับได้ด้วย move/split ทีหลัง
+
+        ล็อกไว้ (locked=1) เพื่อไม่ให้ cluster_observations() เสนอช่วงนี้เข้ากลุ่มไหนอีกเลยในอนาคต
+        ไม่ติด profile ใด ๆ จึงไม่ถูกใช้เป็นตัวแทน (prototype) ของกลุ่มอื่นด้วย
+        """
+        identifiers = self._validated_observation_ids(observation_ids)
+        with self.lock, self.db:
+            self.db.executemany(
+                "UPDATE memberships SET profile_id=NULL,locked=1,score=NULL,state='rejected' WHERE observation_id=?",
+                [(item,) for item in identifiers])
+
+    def unassign_observations(self, observation_ids):
+        """คืนช่วงกลับไปเป็น 'ยังไม่จัดกลุ่ม' ให้ cluster_observations() พิจารณาใหม่ได้ในรอบถัดไป
+
+        ต่างจาก reject_observations ตรงที่ไม่ล็อก (locked=0) จึงยังมีสิทธิ์ถูกเสนอเข้ากลุ่มใหม่
+        """
+        identifiers = self._validated_observation_ids(observation_ids)
+        with self.lock, self.db:
+            self.db.executemany(
+                "UPDATE memberships SET profile_id=NULL,locked=0,score=NULL,state='pending' WHERE observation_id=?",
+                [(item,) for item in identifiers])
+
     def observations(self, *, media_id=None, profile_id=None, kind=None):
         clauses = ["o.run_key=COALESCE((SELECT value FROM meta WHERE key='active:'||o.media_id||':'||o.kind),o.run_key)"]
         parameters = []
@@ -356,6 +414,11 @@ class WorkspaceStore:
             if replace:
                 self.db.execute("DELETE FROM links WHERE voice_id=?", (voice_id,))
             self.db.execute("INSERT OR IGNORE INTO links VALUES (?,?)", (voice_id, visual_id))
+            # ผูกแล้วต้องนับเป็นยืนยันทั้งคู่ด้วย ไม่งั้นการจัดกลุ่มใหม่ (recluster) จะเห็นว่ายัง
+            # ไม่ยืนยันแล้วรีเซ็ต/ลบโปรไฟล์ที่เพิ่งผูกไปทิ้ง ทั้งที่คนยืนยันคู่นี้แล้วจริง ๆ
+            for profile_id in (voice_id, visual_id):
+                self.db.execute("UPDATE profiles SET confirmed=1 WHERE id=?", (profile_id,))
+                self.db.execute("UPDATE memberships SET locked=1,state='confirmed' WHERE profile_id=?", (profile_id,))
 
     def unlink(self, voice_id, visual_id):
         with self.edit("unlink"):

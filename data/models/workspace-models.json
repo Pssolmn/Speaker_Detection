@@ -1,0 +1,32 @@
+[
+  {
+    "file": "ccip/model_feat.onnx",
+    "url": "https://huggingface.co/deepghs/ccip_onnx/resolve/eb2acdd29af1703388d3d0c04221add322bc9110/ccip-caformer-6-randaug-pruned_fp32/model_feat.onnx",
+    "sha256": "a0003a68df9ba75ee41847a90ff228c260b364cf7dedca9e44326a431282599f"
+  },
+  {
+    "file": "ccip/model_metrics.onnx",
+    "url": "https://huggingface.co/deepghs/ccip_onnx/resolve/eb2acdd29af1703388d3d0c04221add322bc9110/ccip-caformer-6-randaug-pruned_fp32/model_metrics.onnx",
+    "sha256": "78b8c2d823857c33617f6bd056872a077486276451714034e0ec1eabc3956bf3"
+  },
+  {
+    "file": "ccip/metrics.json",
+    "url": "https://huggingface.co/deepghs/ccip_onnx/resolve/eb2acdd29af1703388d3d0c04221add322bc9110/ccip-caformer-6-randaug-pruned_fp32/metrics.json",
+    "sha256": "ac4ffff43019f5b9e07a2b2c637eb12b98359cfb208ceb055a424be9985326fa"
+  },
+  {
+    "file": "speaker/segmentation.onnx",
+    "url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-segmentation-models/sherpa-onnx-pyannote-segmentation-3-0.tar.bz2",
+    "sha256": "220ad67ca923bef2fa91f2390c786097bf305bceb5e261d4af67b38e938e1079"
+  },
+  {
+    "file": "speaker/embedding.onnx",
+    "url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-recongition-models/wespeaker_en_voxceleb_resnet34.onnx",
+    "sha256": "5ef208a9da1453335308a6b6f4e6dfbd7e183a38b604de0a57664f45d257fe94"
+  },
+  {
+    "file": "vocals/Kim_Vocal_2.onnx",
+    "source": "UVR / audio-separator model registry",
+    "sha256": "ce74ef3b6a6024ce44211a07be9cf8bc6d87728cc852a68ab34eb8e58cde9c8b"
+  }
+]

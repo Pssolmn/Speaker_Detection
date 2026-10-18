@@ -1,0 +1,24 @@
+id,date,category,summary
+1,2026-10-17,correctness,SRT parser ตัดบล็อกผิดเมื่อ cue มีบรรทัดว่างแทรกอยู่ภายใน
+2,2026-10-17,correctness,ไฟล์ซับ export มี [DEFAULT]/[UNKNOWN] ติดเข้าไปในบทพูด
+3,2026-10-17,correctness,score_active_speakers ใช้ localized=False ทำให้สัญญาณปากขยับเจือจาง
+4,2026-10-17,correctness,install_guard ไม่มี try/except ทำให้แอป crash ตั้งแต่เปิด
+5,2026-10-17,correctness,สแกนเสียงไฟล์เปล่า/เสีย รายงานว่าเสร็จแล้วทั้งที่ไม่มีผลลัพธ์
+6,2026-10-17,correctness,วิดีโอเล่นค้างหลัง error ครั้งเดียว กดเล่นซ้ำไม่มีอะไรเกิดขึ้น
+7,2026-10-17,correctness,add_media มี race condition
+8,2026-10-17,correctness,detection class ที่ไม่รู้จักทำให้ scan ทั้งวิดีโอล้ม
+9,2026-10-17,correctness,assign/clear_subtitles ไม่เช็ก bounds ก่อน index
+10,2026-10-17,correctness,SCRIPT_CONFLICT โชว์ confidence ผิดตัวละคร
+11,2026-10-17,correctness,log error ของ subprocess ไม่ระบุ encoding
+12,2026-10-17,ux,GUI ไม่โชว์ progress ระหว่างแยกเสียง
+13,2026-10-17,ux,ตัวเลขเวลาเล่นวิดีโอความกว้างไม่เท่ากันทำให้ปุ่มสั่น
+14,2026-10-18,feature,ไม่มีทางกรอง/ลบภาพที่ไม่ทับเสียงพูด/ซับออกจากรายการ
+15,2026-10-18,feature,เลือกหลายแถวในตาราง observations และเรียงลำดับไม่ได้
+16,2026-10-18,feature,ไม่มีทางตัดออกแบบย้อนกลับได้ มีแต่ลบถาวร
+17,2026-10-18,feature,เลือกหลายกลุ่มพร้อมกันในแถบซ้ายไม่ได้
+18,2026-10-18,feature,ส่งหลายกลุ่มเข้ากลุ่มเดียวทีเดียวไม่ได้
+19,2026-10-18,ux,คีย์ลัด Ctrl+Right ใช้ไม่ได้บน Mac ชนกับ Mission Control
+20,2026-10-18,correctness-critical,confirm_pair มี silent failure สองจุด กดแล้วดูเหมือนสำเร็จทั้งที่ไม่ได้ผูก
+21,2026-10-18,correctness-critical,link ไม่ตั้ง confirmed=1 ทำให้เครื่องมือจัดกลุ่มใหม่ลบคู่ที่ยืนยันแล้วทิ้ง
+22,2026-10-18,correctness,ช่องค้นหาบทซับไม่ค้นหาคอลัมน์สถานะ หา MULTIPLE_SPEAKERS ไม่เจอ
+23,2026-10-18,reporting,รายงาน 99.3% วัดผิดตัวชี้วัด ไม่ใช่ความถูกต้องของชื่อในซับจริง

@@ -1,0 +1,419 @@
+﻿history_id,action,observation_id,from,to
+2,merge,ee9c0a6a7d979b7ace90419da6a208d72d8dee280e442b76b2bd4cd60daa06e6,ตัวละคร 003,ตัวละคร 001
+2,merge,df2d1545ec130ff1f8d032428cd9ca003756a0594db5dcead11fda2eed1b6016,ตัวละคร 003,ตัวละคร 001
+12,move/split,2aba8b07bb4526836eb4707fabf941a6b48a0adac6fc2e644ae4a9ca5d696fe9,(ยังไม่จัดกลุ่ม),อควา
+13,move/split,65dd1fea60ac3a3d2a8c67eda2822538d2e6ca10a58dffb5b6a8aff20fd0fbd7,(ยังไม่จัดกลุ่ม),รูบี้
+13,move/split,b60b48b31cbb567f2b3452ab3afa1c29acc76affcd5605b352fa2d79794aa420,(ยังไม่จัดกลุ่ม),รูบี้
+13,move/split,94bd11f2ef534548d8a68214f7da6be62879e24f98a6c350370768b7ce3ceedd,(ยังไม่จัดกลุ่ม),รูบี้
+14,move/split,c0f787db964135cc83843cc8b641a52799d22284429d4173fa4c44fb1011e86b,(ยังไม่จัดกลุ่ม),อควา
+15,move/split,7c1bb6a5f62892ea2a181b7ad580eb222cf20f46ac056132e0008b9972438df8,(ยังไม่จัดกลุ่ม),รูบี้
+16,move/split,a17fb68ae684aba0f494998f336c87c09fe1687de7eff1d2f15d4c2a79235585,(ยังไม่จัดกลุ่ม),รูบี้
+16,move/split,67d64b1106e9dafb1ebd8d58f466471e54b6a1c16b535fc86f166d0198e2465a,(ยังไม่จัดกลุ่ม),รูบี้
+16,move/split,da0c39f1c250ebe397d5568d6754b372b832ccf6fc619dbb92a0a7c48419d7e7,(ยังไม่จัดกลุ่ม),รูบี้
+16,move/split,638a2793f98ba4cf67276ce4bada8b4a1462e03e21ca5fcbe6ec1310f78ca088,(ยังไม่จัดกลุ่ม),รูบี้
+16,move/split,465e016eafadb42a203017a8c975cf10bdfccec9e18167173cf2126efcef1258,(ยังไม่จัดกลุ่ม),รูบี้
+18,move/split,ef0870a3c9a1a2537576a788afd681a20d57dcefdcc45375fbfe1ab38f5b42cf,รูบี้,(ยังไม่จัดกลุ่ม)
+18,move/split,a1973a03e1a672d2819cb8fb7f353b4c33fc1baa98f92a3eabdbce3934e8171e,(ยังไม่จัดกลุ่ม),ผู้กำกับ
+19,move/split,a731f0b58492570fdb185707d1b4c7e7546dd2822d1e341c2370ce903621a594,(ยังไม่จัดกลุ่ม),รูบี้
+19,move/split,2cdc75672935ef396a3004f0e03444fc54a17cf4501a68ac6daa45bcb7eb8eb8,(ยังไม่จัดกลุ่ม),รูบี้
+20,move/split,fa1a25bb70e53dd5b1e197e6b66b827624a5b3c88f9aacdbc28c2e64a2344b67,(ยังไม่จัดกลุ่ม),รูบี้
+21,move/split,21f84654fd45c8f750a03b3a4f5ddc67c00be12f099d542fa6cfaf812d453f78,(ยังไม่จัดกลุ่ม),ผู้กำกับ
+22,move/split,11c5dd701e6e336483422026c3ac3511de6bec0166c73486b075d98ef2f2bfb8,(ยังไม่จัดกลุ่ม),รูบี้
+22,move/split,06db4afcab7a386e93ee34d9699058daec4fff3a24464a99e1cd66b4f36b86a6,(ยังไม่จัดกลุ่ม),รูบี้
+22,move/split,3f495f54fec257dc0c47a6c168eb72fc55b04f39641363ef4954524f9110a53d,(ยังไม่จัดกลุ่ม),รูบี้
+22,move/split,d984d2ad8890802be901f614b2dcaf48ab101ced70717ec72793c90a6b4f8bb5,(ยังไม่จัดกลุ่ม),รูบี้
+22,move/split,fb21e53354d807504eb56cbd78b23b7e0a4f7e82a696bb8914944c401d3d906d,(ยังไม่จัดกลุ่ม),รูบี้
+23,move/split,57d620379ab3ccc474b159340373338e1e1cd27d648088e0b4da1ecc9c48f66a,(ยังไม่จัดกลุ่ม),รูบี้
+23,move/split,8da8759736dfc70237f6035d2f6c347f1f3884ad07013144127779135f004bea,(ยังไม่จัดกลุ่ม),รูบี้
+24,move/split,46228bffaae225d0f7a031c15f441a956cee934d60099d90279ade20acceba33,(ยังไม่จัดกลุ่ม),รูบี้
+24,move/split,6e988fe370239536ebb94a648eb5c9b9ec0b1f3808761bf327a07e557912fbeb,(ยังไม่จัดกลุ่ม),รูบี้
+25,move/split,d6ec486a2c0df379ea90cba3d6c078986865b1ddcc94254e26b3da7d87a67ccd,ผู้พูด 004,ผู้กำกับ
+26,move/split,aaf708c4074f8d59ebba39c6764cefd95db886578509a4a7d08d8ed40cab1fd1,ผู้พูด 004,ผู้กำกับ
+28,move/split,eaa8626b380fca556b30f42863a301256875b9ad377be434525deee64d760f02,อควา,(ยังไม่จัดกลุ่ม)
+35,move/split,4c544edfd0919ad9e3364c5b85afc0be6c9420e72aa4137f7b63cfc10f95f94a,รูบี้,(ยังไม่จัดกลุ่ม)
+35,move/split,89a92ea29bc2850052640626eaf5ebe2936250812d073955c091216c195b2ed3,รูบี้,(ยังไม่จัดกลุ่ม)
+35,move/split,b2a8bcafc761311987582d51a908ed233988fce0ab3193b71cb4424be4a0fd22,รูบี้,(ยังไม่จัดกลุ่ม)
+35,move/split,081b040540ba79506acd3b35d0d5796aa1f1861569098269261184aa0eedde4f,รูบี้,(ยังไม่จัดกลุ่ม)
+35,move/split,7265e0f868be8e05de7b239b74ccea20c2e46dcf258d85a34735568804c2cbf1,รูบี้,(ยังไม่จัดกลุ่ม)
+35,move/split,279e14e92236161186ad4885b90e0c3e12bab817cb17170cf1f787d748294746,รูบี้,(ยังไม่จัดกลุ่ม)
+35,move/split,7bc3891fd3025d52a7a0bf853b2799f17a5ba4600cc8201f1463cfc81fa1046a,รูบี้,(ยังไม่จัดกลุ่ม)
+35,move/split,d2ba8bda6464481f1816149e141aa00eb46f700bceb11d62bba3fbabd9ee40f3,(ยังไม่จัดกลุ่ม),รูบี้
+38,move/split,361e3fcc8a5c4996e59838e5da42da60ee4c193de004bb64069da8ede9265a8f,(ยังไม่จัดกลุ่ม),รูบี้
+38,move/split,8016b9c843a3ef6e4a7ef3c8bfa33299d0f61e1ebad18ea5316ab52bd938363d,(ยังไม่จัดกลุ่ม),รูบี้
+41,move/split,f4f61a3ddecbf21d5f6de59a25896600ea09366df533b9287c4fdbdcb3a6dada,(ยังไม่จัดกลุ่ม),อควา
+42,move/split,bbcd11793de655bc229aa1497cfe0a92eb9145965769d379f84348175bccb394,(ยังไม่จัดกลุ่ม),อควา
+43,move/split,f6e0d46ede21c2ccd8dde87fafe69e8cdaf321f65cbfe5da2e5971d6e07554d7,(ยังไม่จัดกลุ่ม),อาคาเนะ
+43,move/split,35f891fa07417336e7162d2418e9a8184922e96e7401f5535321fbff38ebdb34,(ยังไม่จัดกลุ่ม),อาคาเนะ
+43,move/split,bad40b80bfe91c00f0642165da33677cb60717ae5d8716fa4bd7deb64b0f6a5f,(ยังไม่จัดกลุ่ม),อาคาเนะ
+43,move/split,adc98b6962059d0f2e4d835663cb334263f3b63d7f735bdbc85288f2444d09a7,(ยังไม่จัดกลุ่ม),อาคาเนะ
+43,move/split,4c544edfd0919ad9e3364c5b85afc0be6c9420e72aa4137f7b63cfc10f95f94a,(ยังไม่จัดกลุ่ม),อาคาเนะ
+43,move/split,89a92ea29bc2850052640626eaf5ebe2936250812d073955c091216c195b2ed3,(ยังไม่จัดกลุ่ม),อาคาเนะ
+43,move/split,b2a8bcafc761311987582d51a908ed233988fce0ab3193b71cb4424be4a0fd22,(ยังไม่จัดกลุ่ม),อาคาเนะ
+43,move/split,c036e079d51b6480c409fa4e593a47c928cc5db567a941122325b19672f6a54f,(ยังไม่จัดกลุ่ม),อาคาเนะ
+43,move/split,081b040540ba79506acd3b35d0d5796aa1f1861569098269261184aa0eedde4f,(ยังไม่จัดกลุ่ม),อาคาเนะ
+43,move/split,8ea75b7506ad07f5e813eb94cc658578f073ae773378e2a2f8d50ff0eb24e707,(ยังไม่จัดกลุ่ม),อาคาเนะ
+43,move/split,7265e0f868be8e05de7b239b74ccea20c2e46dcf258d85a34735568804c2cbf1,(ยังไม่จัดกลุ่ม),อาคาเนะ
+44,move/split,dc6644799fd35f48336267591e25b2c8e4b7cb735a4913571efd23312fb362be,(ยังไม่จัดกลุ่ม),อควา
+45,move/split,6c8bdaad2ae9a57999e72279a27bfa5a77a22cac162be6cbf27a9e2365459232,(ยังไม่จัดกลุ่ม),อควา
+46,move/split,36c30afd3f9cdd9353f5379c47cb28bd79afdaca9e57be23a93e3272f11e8511,(ยังไม่จัดกลุ่ม),อาคาเนะ
+47,move/split,ab96b5685d2ac2887edcea7acc3ac15f29b1a22c2e206cc98400e728635ba855,ผู้กำกับ,ผู้พูด 010
+47,move/split,572090bb01be542058bb564480eeb7cdd5ccf46a20d3b64c5231b89a23cd87a2,ผู้กำกับ,ผู้พูด 010
+47,move/split,39459b7a2431427ca0d8f8692c14bee4c7729ea092448efc9ac4d4d6bfe53f25,ผู้กำกับ,ผู้พูด 010
+47,move/split,73ebcc3db66160d02e352540a847cdf1093e35da82e5b8eb7e4ae6196aeb6fe8,ผู้กำกับ,ผู้พูด 010
+47,move/split,0ea1f8c401158b66e4e521d21bc915ad67fbea533e36b7ca42862ae8cedaafea,ผู้กำกับ,ผู้พูด 010
+47,move/split,282b2e5783359422d78ce1f5fc837abcfdf7c9993450e28411fe44687ffab71d,ผู้กำกับ,ผู้พูด 010
+47,move/split,a198caf145b156b810e1b29a7f924257bdceec6a10235333946b96c8e234dd73,ผู้กำกับ,ผู้พูด 010
+47,move/split,658cf175546510d175b9f0d3ddba131b4ebf3fdd3490e49ee6c6f65170441076,ผู้กำกับ,ผู้พูด 010
+47,move/split,97436877e1e86d4c5abd645db441887354c0904b7f1db22b7f203bfc236adc55,ผู้กำกับ,ผู้พูด 010
+47,move/split,8afa9a6ba3d995e0c3908d9c3d45be4ad47d57729a387aaafda546b6c077c476,ผู้กำกับ,ผู้พูด 010
+47,move/split,93dda3448d594054d6145bcd4f206dc3b6e446bbb9466ef8641a6df8905f6b60,ผู้กำกับ,ผู้พูด 010
+47,move/split,ba97afc2ad3f394896b224f8dca3385ed39c7cfa2f5b94487d6459c43e8dfd53,ผู้กำกับ,ผู้พูด 010
+47,move/split,00abbeb0667c731a64ba68de87510ea53d0f7cc7d1461d8bb1168922c9e1cf1e,ผู้กำกับ,ผู้พูด 010
+47,move/split,ee054037d7120fd6c97a7b47553af7e89bf94249522eeefc8e17acd89fc43d3c,ผู้กำกับ,ผู้พูด 010
+47,move/split,73af5cce4157ed2c423be463a243c8d49a7fa8f588aff7e8471adeb46f86e580,ผู้กำกับ,ผู้พูด 010
+47,move/split,c431a7714b55f2731096a05835dccfd3656b31d6b83f52542bb7274b650684d7,ผู้กำกับ,ผู้พูด 010
+47,move/split,76d3b90f52a64c8930a9b4751a08a2b096120e22b2409d8b0462c83b52e2516d,ผู้กำกับ,ผู้พูด 010
+47,move/split,bf76e35d3eac8d995246dff60b248e6bd53a8d69a6af088172509c2a7460e724,ผู้กำกับ,ผู้พูด 010
+47,move/split,879432b7b5b318d97b15fd02cc21042c5267ce08c3e9f0add58e1b87756e54ba,ผู้กำกับ,ผู้พูด 010
+47,move/split,9300fff293473cb3002406e88de413e2578dea07ec8e6d5d8d10cfd392ad054e,ผู้กำกับ,ผู้พูด 010
+47,move/split,c6a65f6749419c3692f3acd4d2c9659f1b5cbcc3b50013aa4bd29af3463e33e7,ผู้กำกับ,ผู้พูด 010
+47,move/split,936103c802917cbe6adf60e5dc1bd41adb1499808a8b78935df10dc0286eb0a0,ผู้กำกับ,ผู้พูด 010
+47,move/split,adf1079fe4b31c68fc2f802bd034cee3d9f0d2644fab120426cf0119e6b87b5c,ผู้กำกับ,ผู้พูด 010
+47,move/split,27bf48c5041f2e44157d5c956a4339b1b4dd7304955088824b9e4911c9d93ace,ผู้กำกับ,ผู้พูด 010
+47,move/split,5c9707b84d67f9b8cd3053e5552c8f475385b29f12ccb9032bcb90aadb6fb738,ผู้กำกับ,ผู้พูด 010
+47,move/split,5ab6869218f7dc3884fd89fff29409bca4339353cb8e80896da57922b7329949,ผู้กำกับ,ผู้พูด 010
+47,move/split,cfcd025db95959bcb4a74196bc4b0e9392d226a0d04e56a0981a4a1cddb20106,ผู้กำกับ,ผู้พูด 010
+47,move/split,380b5bbf9e2f44a8f56d7b361f4e62f7c54521ced6f48d1ab61119689dd53ceb,ผู้พูด 004,ผู้กำกับ
+47,move/split,b4d5e11d53d3af1fac9ad2cf9d985fd7166a41d33f7ed0f8ac0379303daddd04,ผู้พูด 004,ผู้กำกับ
+47,move/split,27d57a9360b8336103cf43418134a0cb140d68dbeb3903a7b3612a2da9b4f434,โยชิซูมิ,อาคาเนะ
+47,move/split,6e723c9c70cc1464c0fb69a894ac469eed3ddd17022a4d4d0c46e9d27d1913d0,ผู้พูด 004,ผู้กำกับ
+47,move/split,a98b2343966af55a308f6c05dcc1520bd0bc3c4d6b7e2b5d437255463dc67d98,ผู้กำกับ,ผู้พูด 010
+47,move/split,a558efe66f53935919d59c04a117b384731cedeaa53eb597188cca435166c3b8,ผู้กำกับ,ผู้พูด 010
+47,move/split,4018cc54b95f27b6c239f4af608d4bfb6bd8666b842cd70635c2863539f0bbdc,ผู้กำกับ,ผู้พูด 010
+47,move/split,d6b8b1962f7aa81d8a9cbba334081943f7ef4684882ad35e0934299b5ff57ff7,โยชิซูมิ,อาคาเนะ
+47,move/split,2923faf7204a1392f6f444aa7cb0a774345b3a5c5e3d28d18e4d2dd44991538a,โยชิซูมิ,อาคาเนะ
+47,move/split,855750a6dcd2c3be78df61f0a14bd15c1a6e7172a636fdb5e44a8d7ffc03f1a2,โยชิซูมิ,(ยังไม่จัดกลุ่ม)
+47,move/split,cba97fb7d7723e9cfdbf4857c96c5ed1f092ddb281e6c24e840e9649ac663d63,โยชิซูมิ,(ยังไม่จัดกลุ่ม)
+47,move/split,218398ae05f360d6e13339a11b196d648619a0ffe8603a3d71f7adb07e585ee8,โยชิซูมิ,(ยังไม่จัดกลุ่ม)
+47,move/split,39f05d9a8c482c739e9e121dca90ef9754991d3dc7a4382dcd0f1f8e30b107b0,โยชิซูมิ,ผู้กำกับ
+47,move/split,cfa4f05dc2b9f633359e4ec015b3101723b7bad717ba9464bd84ddda32aefd3b,โยชิซูมิ,ผู้กำกับ
+47,move/split,b037320f9e609a6e2e4e62286cb9a19ef9df9c6b675fa518e14aba7055682950,โยชิซูมิ,(ยังไม่จัดกลุ่ม)
+47,move/split,66f919d681bdac9a9ac8b8d1d0837879095e532711a8a82fc76908fcc23bc20d,โยชิซูมิ,ผู้กำกับ
+47,move/split,863afa10bfe7ea8f681ded17ec932d1b8c5719b0c6f149d50d5e53324c8146d6,โยชิซูมิ,ผู้กำกับ
+47,move/split,8f57913917e63f1cefbcc03ccb71154c9272105c9d45f1bcbcbfcc5b56da9f29,ผู้พูด 004,ผู้กำกับ
+47,move/split,a76ebf661985626afd5293612ff2607967a698405188ba98ae3da1a128162443,โยชิซูมิ,ผู้กำกับ
+47,move/split,02bc2e72d8a03be487966f78e814168829e4f807b9acb12f7f18f4d24a0a581c,โยชิซูมิ,ผู้กำกับ
+47,move/split,d292eb253dd3b0d501b4e82dca31f1de7e49ed915524dcf68d51e827a8e9c895,ผู้พูด 004,ผู้กำกับ
+47,move/split,a89d0152ea5a904d08dac57e96ac07767e9e8121cade97f93f08c309351a28b9,ผู้พูด 004,ผู้กำกับ
+47,move/split,1d3de60a55fcb2f9385ee963e4ddf78f3eb9d9cebd09de0f45df2ce0901db4ad,โยชิซูมิ,ผู้กำกับ
+47,move/split,21c84876535a7e64c491599b5d2f782a12eb2fe43c25260a7d8953354ed74b91,(ยังไม่จัดกลุ่ม),ผู้กำกับ
+47,move/split,c58efff9f73f333408d9913d5cccaa4f005c824937cfa925bafbbe43755453f6,ผู้พูด 004,ผู้กำกับ
+47,move/split,96e21cc5a53bedb4a0bcb9dcd68a98a57932b3f1363922c981413e8b10a2acba,ผู้กำกับ,ผู้พูด 010
+47,move/split,db73005f7c4b04ac5657ed5b33dd8ced01b64ae9e9548e9f8d1eb8a9237df60f,โยชิซูมิ,อาคาเนะ
+47,move/split,bc708368b745e5dbb5ee0e563ec98bb66fe04a22bcfd2b9df62a10e99f3eefaf,ผู้พูด 006,ผู้พูด 011
+47,move/split,a6b3307cc6412a419921b4879b780b3851c91cbcb9b6a724a169613282a003d8,โยชิซูมิ,อาคาเนะ
+47,move/split,2f5d5a6dbc0a992950789dc116158249d83e6663e11520085c5ab648052e09be,ผู้กำกับ,ผู้พูด 011
+47,move/split,6912829f7e5b09352626d6e6ad4351c1812042249d4495d0035219e49adf5636,โยชิซูมิ,(ยังไม่จัดกลุ่ม)
+47,move/split,c68be20c5b1f582ba1372a03784b09e580d8d42471d4c1b0ec0d438c4f2a9aee,ผู้พูด 006,ผู้พูด 011
+47,move/split,f5680fe736d73ff9f99748d03ba6614fe31e6436c6e13d95ef606ab1f950798d,โยชิซูมิ,(ยังไม่จัดกลุ่ม)
+47,move/split,fafb345708f5763b133f3dd0d62a1298948320597ad3754098ab4b2f9ef4d7fb,ผู้พูด 006,ผู้พูด 011
+47,move/split,6843f3cbc249d5b2038a52dae167173326c0821b0331fd404c7328d5fc0b311f,โยชิซูมิ,(ยังไม่จัดกลุ่ม)
+47,move/split,55314b044dabfd990804474ebf8007de1d8f33afdf6abac7b6d71e5475cba289,โยชิซูมิ,อาคาเนะ
+47,move/split,e70dc07bb8602f1f01cda6f0a61a621403cacec1d22752b3082bb312f131c0fe,ผู้พูด 004,ผู้กำกับ
+47,move/split,3661eb073d2118215ebaf3752b724d98ad206d16df76c0ed9f8b010e9350958b,(ยังไม่จัดกลุ่ม),ผู้กำกับ
+47,move/split,b98cf57f06470ed12e76ba373e41dec42fcf90c349143c03c50d54cc5ef8531e,โยชิซูมิ,อาคาเนะ
+47,move/split,a275346fbba762bbbcd9b12994c130d82b2ab89da90bf5d90e182a245c8bcdc6,(ยังไม่จัดกลุ่ม),อาคาเนะ
+47,move/split,919d21e38def60234a7cc688ee35682f309bba6cd26c50ea05106178872f765c,(ยังไม่จัดกลุ่ม),อาคาเนะ
+47,move/split,58fd139799385b290d46927bb74d3d2a804269df3b5c63b7a6d3c7ff528846b1,โยชิซูมิ,อาคาเนะ
+47,move/split,279e14e92236161186ad4885b90e0c3e12bab817cb17170cf1f787d748294746,(ยังไม่จัดกลุ่ม),อาคาเนะ
+47,move/split,ba3c1f99cf03fb0194e70cd498e6ac4e96684d3100e5da4dc2a3fd4c14e013e7,(ยังไม่จัดกลุ่ม),อาคาเนะ
+47,move/split,dcd6596372a9c11ba7f96ff86dba605393e2f371577373f9572585c3bc301c79,(ยังไม่จัดกลุ่ม),อาคาเนะ
+47,move/split,0f14000ba570ac294765d0a419ac2fe3302f025de19d139022d87f8182a90c1f,ผู้พูด 004,ผู้กำกับ
+47,move/split,04f77ee45adfb331f897e16a80e943663803b8b087b37f4ba7293e9f321e9883,โยชิซูมิ,(ยังไม่จัดกลุ่ม)
+47,move/split,7276434dfdf616d9f8d9a096df21679cf4834527aafffa002ebb9ea51f36e188,(ยังไม่จัดกลุ่ม),รูบี้
+47,move/split,f4110edbb9587df2e66379fab6e9fc1c645b98b071432106f093166f09e5c4a8,โยชิซูมิ,ผู้กำกับ
+47,move/split,42310d3187698498f7942186fd761ba68e34f9abb2530958ac91d98db3599ab1,(ยังไม่จัดกลุ่ม),อาคาเนะ
+47,move/split,3e63ede07b5e94f9dacbd47de4feaf47cd612037b21b225e32d5438c6fa80d87,(ยังไม่จัดกลุ่ม),อาคาเนะ
+47,move/split,5b81c0d04bd2b4d3ecf4e3565ea17c165a06512a70a3735020133a4440973775,โยชิซูมิ,(ยังไม่จัดกลุ่ม)
+47,move/split,0bf95b024d7fb9d7c51cc17bcc62c4ae62ab02949edb1a7132dd0f268b387cce,โยชิซูมิ,ผู้กำกับ
+47,move/split,9c856b866a159e18ced79e44390f2f7346c83feba4ef9997bd0bdd82fb25860e,โยชิซูมิ,ผู้กำกับ
+47,move/split,3597bec49b8a09951c0bf52892eb6a9f550fcc7b80f91bfdf3644355b1efa536,โยชิซูมิ,ผู้กำกับ
+47,move/split,6ed902c01479f6d49294578f55d62f6e271ec6094990eeeb705d11cedbfa4613,โยชิซูมิ,ผู้กำกับ
+47,move/split,25733f36a7ed0c04ee0d8506e660c802f46122199dbf4f438b1f07cf1ae3b275,โยชิซูมิ,ผู้กำกับ
+47,move/split,abd1f7503abb389e3d2151829ed985e25bd4fcbccf78f3e02384c04dd9be3b35,โยชิซูมิ,ผู้กำกับ
+47,move/split,181059d8ddda1eb9af412b856a04f27408b8f69fd7d3b0eee817e908887f91cc,โยชิซูมิ,ผู้กำกับ
+47,move/split,fe6a7e8db22500fa6291df1436193f5ae22a2cb4c52883e4a4663ae8ff188d12,โยชิซูมิ,ผู้กำกับ
+47,move/split,d1562673f36739aa82bf0daef9df917fb773883815070ef4212936bc461c1664,โยชิซูมิ,(ยังไม่จัดกลุ่ม)
+47,move/split,15f34b69b1b42761ef8fabcbcb404d0297ccc65158ecdc3c275afbb74ebe01ec,โยชิซูมิ,ผู้กำกับ
+47,move/split,3151e3d1f1be4877440ffe6fac17188f103740b5f87db532d2c1a526c2faf8df,โยชิซูมิ,(ยังไม่จัดกลุ่ม)
+47,move/split,6a436fe51e8158da7c660e6061555e9c07d17caf07cf3f2dcdc26d9f9ea157eb,(ยังไม่จัดกลุ่ม),อาคาเนะ
+47,move/split,80fd8609c2df6badc9f68aed942aabc388416a754965622c9c2cddf87793f1a8,โยชิซูมิ,(ยังไม่จัดกลุ่ม)
+47,move/split,2977790b618cdab0c63fc6a51f4f3f4cf733fdcffe11a14bf5733a54d6c23354,โยชิซูมิ,ผู้พูด 012
+47,move/split,507276d09faaad2352563d7f70e9c1d935276f3dcfa68b8ede1e1cc4ec90de6d,โยชิซูมิ,อาคาเนะ
+47,move/split,5b8eb57b950ccf7fe8a76a211a710d486fb0cd3e92847e5e5f23fed3715965b5,โยชิซูมิ,(ยังไม่จัดกลุ่ม)
+47,move/split,722c5db79ed2b834187993ec82841e308bc8a324a5874ecbc9df467d471b3733,ผู้พูด 004,ผู้กำกับ
+47,move/split,6d270cbbd54161e4e37903f3232790cfa0ed2fcb45d1a014704dc8e79966d863,โยชิซูมิ,ผู้พูด 012
+47,move/split,4590450b0b6a34a9fca50ce425e27cf45e77c6b473ad08aad37f094cd93c6513,ผู้พูด 006,ผู้พูด 011
+47,move/split,336b7e5bdce9b528b3c16453969730bdc1e7c35985c6775a2e8bfe0f2399d5d8,ผู้พูด 006,ผู้พูด 011
+47,move/split,79d5130450d2ebcab771c07f5e9fc33db79e500d7460fec0a5b7193e7053aed9,โยชิซูมิ,อาคาเนะ
+47,move/split,e4b8d901d74711fb8a9f559b6e110c4005615dcf18e64ad8526e51028163c583,โยชิซูมิ,(ยังไม่จัดกลุ่ม)
+47,move/split,ec994d60e48da05c02d9ed145f1285947a308e2ad0bc43ec64800c5070b4b324,ผู้พูด 007,ผู้พูด 011
+47,move/split,8ad7292935b78d4af17e1b93ec3b1d2539b66ce274b3257175260b519331374e,โยชิซูมิ,ผู้พูด 011
+47,move/split,112071a4da8cbc6f787ff5b762b3864dd5a617404dd585ad9738b6d1e27f6be9,ผู้พูด 006,ผู้พูด 011
+47,move/split,f121fe13743351b146aaac011869f1eda726ce8caba8a2f131388eed217c9fe4,ผู้พูด 004,ผู้กำกับ
+47,move/split,302ff0bc83e83335612a10b3d4c2328d147f52ef07b7c59e3a5d1acbc3c01ac5,ผู้พูด 006,ผู้พูด 011
+47,move/split,5711fb477ecb1352b0cb279ced7c9ca2cffdd99951376d8edfa873b9cf35d3a1,โยชิซูมิ,อาคาเนะ
+47,move/split,2ddea2cc1290d7793561c2199cee7f53db6ae4ebc20a7f434f76409657329317,(ยังไม่จัดกลุ่ม),อาคาเนะ
+47,move/split,2a3b38abd704b187c203fe175842a5e7a01d1c7fbe1d3dba579078f14421ee41,ผู้พูด 006,ผู้พูด 011
+47,move/split,740b1ae197eebcf26c5cdcad8885b99318a1abd3f1918bc33327ce1345a53d6a,ผู้พูด 006,ผู้พูด 011
+47,move/split,9405aa2deb78a90e635543049b5688ec53d822f6a4d7aa5b1efd23d396410aef,ผู้พูด 006,ผู้พูด 011
+47,move/split,1435c70044e8d242ab877edaaead419a7091b5baa3e2cae96e266c4e74669b5a,(ยังไม่จัดกลุ่ม),อาคาเนะ
+47,move/split,849227fc205a5daef4f1a7415890a1b0e728abed4c17eb97bba91d97e7ae3711,โยชิซูมิ,(ยังไม่จัดกลุ่ม)
+47,move/split,e3ff46d6eaa402af27282478200fad9ebe234a9e57d2823eb17605726ddb677a,(ยังไม่จัดกลุ่ม),อาคาเนะ
+47,move/split,8b5671dc683b230d05e44bc9bfbf6db71859bfbadd0157de720407d2d0adfce7,โยชิซูมิ,(ยังไม่จัดกลุ่ม)
+47,move/split,439fa1039370c44e3775a6c642582c05ebac438e9de047dfc991afe3ce6bb2f8,โยชิซูมิ,(ยังไม่จัดกลุ่ม)
+47,move/split,832ef229428d89e531d19ff33b3fb126bef51f6a12e390ad4b534f9947a6cf5d,ผู้พูด 008,ผู้พูด 013
+47,move/split,3c0720d7bdaa592367f493e2b163379d781906e25edea8cbae15488ae3434b9f,โยชิซูมิ,(ยังไม่จัดกลุ่ม)
+47,move/split,396abbe6882e5621a419187f1c8c27faff1c7e2c1a60d7669d575a9fec88aff6,โยชิซูมิ,(ยังไม่จัดกลุ่ม)
+48,move/split,507276d09faaad2352563d7f70e9c1d935276f3dcfa68b8ede1e1cc4ec90de6d,อาคาเนะ,รูบี้
+57,move/split,d6b8b1962f7aa81d8a9cbba334081943f7ef4684882ad35e0934299b5ff57ff7,อาคาเนะ,โยชิซูมิ
+57,move/split,2923faf7204a1392f6f444aa7cb0a774345b3a5c5e3d28d18e4d2dd44991538a,อาคาเนะ,โยชิซูมิ
+57,move/split,55314b044dabfd990804474ebf8007de1d8f33afdf6abac7b6d71e5475cba289,อาคาเนะ,โยชิซูมิ
+59,delete profile,,ตัวละคร 019,(ลบโปรไฟล์ทิ้ง · เคยมี 0 ช่วงผูกอยู่)
+60,delete profile,,ตัวละคร 029,(ลบโปรไฟล์ทิ้ง · เคยมี 2 ช่วงผูกอยู่)
+61,delete profile,,ตัวละคร 056,(ลบโปรไฟล์ทิ้ง · เคยมี 6 ช่วงผูกอยู่)
+64,move/split,74d994c37419a93e7d5ca20867654c78b0929841868b8d1c31ac47aa605ba8fd,ผู้กำกับรุ่นใหญ่,(ยังไม่จัดกลุ่ม)
+64,move/split,91cfd7cdd34d140758bd81fd0637ec3f074804e805c93661ce584d6752935e4c,ผู้กำกับรุ่นใหญ่,(ยังไม่จัดกลุ่ม)
+64,move/split,fe487559524bce307f863314c534c54296414904330fb7955801de44ab61e635,ผู้กำกับรุ่นใหญ่,(ยังไม่จัดกลุ่ม)
+64,move/split,f9cc988a3c08490d2da4ad506007b470fc5b2d075824015024798e2a8558b8e7,ผู้กำกับรุ่นใหญ่,(ยังไม่จัดกลุ่ม)
+64,move/split,a4ac1a373cf2f9956005152ee51c1109c5a3a7ede39cf8631cc0ee57a70b6347,ผู้กำกับรุ่นใหญ่,(ยังไม่จัดกลุ่ม)
+64,move/split,c9e9399f3a63f2f6b6dfad2c04d3ba7852369efd15c1036a7c6299253e5d2954,ผู้กำกับรุ่นใหญ่,(ยังไม่จัดกลุ่ม)
+64,move/split,05b82534b9ebe77f6b92965f4de1256143ccf8c7683c92f7b569e1c3b014a262,ผู้กำกับรุ่นใหญ่,(ยังไม่จัดกลุ่ม)
+64,move/split,d5ade4285985f8b62bbc4875f4bd6ec53ecb84690068e96bb182039124c4a295,ผู้กำกับรุ่นใหญ่,(ยังไม่จัดกลุ่ม)
+64,move/split,fcb407ddd30e0c789cc96497109d7e1fe9702dc1b7ef75f2f29ec2418a65a8f3,ผู้กำกับรุ่นใหญ่,(ยังไม่จัดกลุ่ม)
+64,move/split,85e653fc9d27f030d92ab2c97cf64d0170f6cc83d412ac4cf5c5bc6508b07a90,ผู้กำกับรุ่นใหญ่,(ยังไม่จัดกลุ่ม)
+64,move/split,cf6e5c9ff112c6c9e0c22c7def829484f5f15ca120c7e9256baecab482fec19a,ผู้กำกับรุ่นใหญ่,(ยังไม่จัดกลุ่ม)
+64,move/split,013d2b6c8dcb3bd7675ac29a500ecca63582e89cc249c4b5ed6e96a0620c5f69,ผู้กำกับรุ่นใหญ่,(ยังไม่จัดกลุ่ม)
+64,move/split,7bee4a16b053370c14a0df3bf1f91e58701286ff5ea470b59e7a1ac182165dcb,ผู้กำกับรุ่นใหญ่,(ยังไม่จัดกลุ่ม)
+64,move/split,0fe4831fe32fefe114544ba75c7bd7a69743daa24e7d8ed8b063dc77e7eed3a5,ผู้กำกับรุ่นใหญ่,(ยังไม่จัดกลุ่ม)
+64,move/split,6ef1231a474c6856508018150232fffa043cabaa5449a1267b966f4e3e7922ab,ผู้กำกับรุ่นใหญ่,(ยังไม่จัดกลุ่ม)
+64,move/split,a18b221a3dbd77393fb0b0cd3ef1b8a2bc998f5b51e629ed836f9a4cd3f4d519,ผู้กำกับรุ่นใหญ่,(ยังไม่จัดกลุ่ม)
+64,move/split,e21019643e0fca79535403c26aabf66939218b30a4502d4fb67adfa7ab38d693,ผู้กำกับรุ่นใหญ่,(ยังไม่จัดกลุ่ม)
+64,move/split,a7b1b059535dccdf56546c446a2ab2b4a3a18a129c9e8b028d566dd9c5008f71,ผู้กำกับรุ่นใหญ่,(ยังไม่จัดกลุ่ม)
+64,move/split,540bf14832ef5d0eef36aa48418e97ca39a3c6d52a29aa79c2da8de7e5bf4187,ผู้กำกับรุ่นใหญ่,(ยังไม่จัดกลุ่ม)
+64,move/split,ac6d00cf282f01f93b45ff549dbe43535a3df442d3cf45c4bb9174b557a6e1b3,ผู้กำกับรุ่นใหญ่,(ยังไม่จัดกลุ่ม)
+64,move/split,1ae27636e512a8df32ec00c8dca0f2e92b5f864aaf9e6b1d5aca7113a4ce372f,ผู้กำกับรุ่นใหญ่,(ยังไม่จัดกลุ่ม)
+64,move/split,f847ed7e1a5f37f6cb97bec453eb7f0771ebdfcf3fd2cd3c05e728101332404a,ผู้กำกับรุ่นใหญ่,(ยังไม่จัดกลุ่ม)
+64,move/split,04c756d9b37ea99865d497c3248e64d9044a85d7d1d273ac973f689848dea220,ผู้กำกับรุ่นใหญ่,(ยังไม่จัดกลุ่ม)
+64,move/split,f2f6e613a293a9ad8f0a49b806428df187fc0a49f38db8bab4dfe4923ff30287,ผู้กำกับรุ่นใหญ่,(ยังไม่จัดกลุ่ม)
+68,delete profile,,ตัวละคร 034,(ลบโปรไฟล์ทิ้ง · เคยมี 3 ช่วงผูกอยู่)
+69,delete profile,,ตัวละคร 030,(ลบโปรไฟล์ทิ้ง · เคยมี 2 ช่วงผูกอยู่)
+70,delete profile,,ตัวละคร 031,(ลบโปรไฟล์ทิ้ง · เคยมี 2 ช่วงผูกอยู่)
+71,delete profile,,ตัวละคร 032,(ลบโปรไฟล์ทิ้ง · เคยมี 2 ช่วงผูกอยู่)
+72,delete profile,,ตัวละคร 033,(ลบโปรไฟล์ทิ้ง · เคยมี 2 ช่วงผูกอยู่)
+73,delete profile,,ตัวละคร 044,(ลบโปรไฟล์ทิ้ง · เคยมี 2 ช่วงผูกอยู่)
+74,delete profile,,ตัวละคร 045,(ลบโปรไฟล์ทิ้ง · เคยมี 2 ช่วงผูกอยู่)
+75,delete profile,,ตัวละคร 046,(ลบโปรไฟล์ทิ้ง · เคยมี 2 ช่วงผูกอยู่)
+76,delete profile,,ตัวละคร 047,(ลบโปรไฟล์ทิ้ง · เคยมี 2 ช่วงผูกอยู่)
+77,delete profile,,ตัวละคร 048,(ลบโปรไฟล์ทิ้ง · เคยมี 2 ช่วงผูกอยู่)
+78,delete profile,,ตัวละคร 049,(ลบโปรไฟล์ทิ้ง · เคยมี 2 ช่วงผูกอยู่)
+79,delete profile,,ตัวละคร 050,(ลบโปรไฟล์ทิ้ง · เคยมี 2 ช่วงผูกอยู่)
+80,delete profile,,ตัวละคร 051,(ลบโปรไฟล์ทิ้ง · เคยมี 2 ช่วงผูกอยู่)
+81,delete profile,,ตัวละคร 052,(ลบโปรไฟล์ทิ้ง · เคยมี 1 ช่วงผูกอยู่)
+82,delete profile,,ตัวละคร 053,(ลบโปรไฟล์ทิ้ง · เคยมี 1 ช่วงผูกอยู่)
+83,delete profile,,ตัวละคร 054,(ลบโปรไฟล์ทิ้ง · เคยมี 1 ช่วงผูกอยู่)
+84,delete profile,,ตัวละคร 055,(ลบโปรไฟล์ทิ้ง · เคยมี 3 ช่วงผูกอยู่)
+85,delete profile,,ตัวละคร 043,(ลบโปรไฟล์ทิ้ง · เคยมี 6 ช่วงผูกอยู่)
+88,delete profile,,ตัวละคร 038,(ลบโปรไฟล์ทิ้ง · เคยมี 1 ช่วงผูกอยู่)
+89,delete profile,,ตัวละคร 039,(ลบโปรไฟล์ทิ้ง · เคยมี 6 ช่วงผูกอยู่)
+90,delete profile,,ตัวละคร 040,(ลบโปรไฟล์ทิ้ง · เคยมี 1 ช่วงผูกอยู่)
+91,delete profile,,ตัวละคร 041,(ลบโปรไฟล์ทิ้ง · เคยมี 2 ช่วงผูกอยู่)
+92,delete profile,,ตัวละคร 008,(ลบโปรไฟล์ทิ้ง · เคยมี 3 ช่วงผูกอยู่)
+93,delete profile,,ตัวละคร 009,(ลบโปรไฟล์ทิ้ง · เคยมี 1 ช่วงผูกอยู่)
+94,delete profile,,ตัวละคร 010,(ลบโปรไฟล์ทิ้ง · เคยมี 3 ช่วงผูกอยู่)
+95,delete profile,,ตัวละคร 011,(ลบโปรไฟล์ทิ้ง · เคยมี 7 ช่วงผูกอยู่)
+96,delete profile,,ตัวละคร 012,(ลบโปรไฟล์ทิ้ง · เคยมี 3 ช่วงผูกอยู่)
+97,delete profile,,ตัวละคร 013,(ลบโปรไฟล์ทิ้ง · เคยมี 3 ช่วงผูกอยู่)
+98,delete profile,,ตัวละคร 014,(ลบโปรไฟล์ทิ้ง · เคยมี 1 ช่วงผูกอยู่)
+99,delete profile,,ตัวละคร 015,(ลบโปรไฟล์ทิ้ง · เคยมี 3 ช่วงผูกอยู่)
+100,delete profile,,ตัวละคร 016,(ลบโปรไฟล์ทิ้ง · เคยมี 1 ช่วงผูกอยู่)
+101,delete profile,,ตัวละคร 017,(ลบโปรไฟล์ทิ้ง · เคยมี 1 ช่วงผูกอยู่)
+102,delete profile,,ตัวละคร 018,(ลบโปรไฟล์ทิ้ง · เคยมี 2 ช่วงผูกอยู่)
+103,delete profile,,ตัวละคร 020,(ลบโปรไฟล์ทิ้ง · เคยมี 1 ช่วงผูกอยู่)
+104,delete profile,,ตัวละคร 021,(ลบโปรไฟล์ทิ้ง · เคยมี 1 ช่วงผูกอยู่)
+107,delete profile,,ตัวละคร 036,(ลบโปรไฟล์ทิ้ง · เคยมี 2 ช่วงผูกอยู่)
+108,delete profile,,ตัวละคร 035,(ลบโปรไฟล์ทิ้ง · เคยมี 2 ช่วงผูกอยู่)
+109,delete profile,,ตัวละคร 027,(ลบโปรไฟล์ทิ้ง · เคยมี 22 ช่วงผูกอยู่)
+110,delete profile,,ตัวละคร 026,(ลบโปรไฟล์ทิ้ง · เคยมี 3 ช่วงผูกอยู่)
+111,delete profile,,ตัวละคร 024,(ลบโปรไฟล์ทิ้ง · เคยมี 10 ช่วงผูกอยู่)
+112,delete profile,,ตัวละคร 025,(ลบโปรไฟล์ทิ้ง · เคยมี 2 ช่วงผูกอยู่)
+113,move/split,f055bb0352544c148d02f15ff1a3ad631ee3a3e1d2a0493aad21748116b3256a,ตัวละคร 023,รูบี้
+113,move/split,8a5d996ef1db6274b1910d18d3066ba253986d7dfd0cd177e7b6bdf954ac99b2,ตัวละคร 023,รูบี้
+113,move/split,e68ad763b44c9cac5b3027865e56bfc78e7aedc2ef2d32c338abea4b81bde005,ตัวละคร 023,รูบี้
+113,move/split,8b30df803d57ace126ab36977c96de9dee5f4921d86249be86d7a4722c6e1a71,ตัวละคร 023,(ยังไม่จัดกลุ่ม)
+113,move/split,2a8d91475bde2c8b4759bfb624f4b870412a25fe9c85d041434014e234000353,ตัวละคร 023,(ยังไม่จัดกลุ่ม)
+113,move/split,12026bb09405c1bf88e2639b2697fc08cf44001cf01d6619ae89ccb23126035e,ตัวละคร 023,(ยังไม่จัดกลุ่ม)
+113,move/split,21c582a11df1d44c00ab76f61d8c78de2510ad950ec57fa4f6f9a744f36bdb34,ตัวละคร 023,(ยังไม่จัดกลุ่ม)
+113,move/split,d926de0ef3fc761ab8789d378ca7980854156a7239b97ddb1f0486897fc9c87b,ตัวละคร 023,(ยังไม่จัดกลุ่ม)
+113,move/split,0601c4d51bd92c96ee66a30474c97ae84bfdea62c82178c4a5172f6e92b59a1a,ตัวละคร 023,(ยังไม่จัดกลุ่ม)
+113,move/split,e7d00ecd5636e6628274a080eea9b2c8e4fbff3782e7a5a53264239238243a97,ตัวละคร 023,(ยังไม่จัดกลุ่ม)
+113,move/split,7db772d59166c5d72b42319d088e54118b338d69bcbe6bd93b681f7d0de7bc4b,ตัวละคร 023,(ยังไม่จัดกลุ่ม)
+114,move/split,7ecdb1d619721b6c63ccdaca8781d3af98b7d9bd1876fa690f7551f677ac0513,ตัวละคร 023,(ยังไม่จัดกลุ่ม)
+114,move/split,aa909c93bf080845ed0f9bce6fe3aabfa61b02c4ed4d20703729d4bbef8d3195,ตัวละคร 023,(ยังไม่จัดกลุ่ม)
+114,move/split,8b43712cf969b4a10594788ea1921bd5ceb8827a7c06b582d078e18d95f96229,ตัวละคร 023,(ยังไม่จัดกลุ่ม)
+114,move/split,6f47414e6790267c5373018c42f08d7f94790a330b99961c7a5421e2f7f84d58,ตัวละคร 023,รูบี้
+114,move/split,4494ae480d3438d8d50129de5c2ba9725571a28d62af30bc494e38010e3c58c7,ตัวละคร 023,รูบี้
+114,move/split,5508ee1e625cf1085d6a5efd25ae9b7665fb7685a8274acfabdcdeffc23273e8,ตัวละคร 023,รูบี้
+115,move/split,3f899d7c059bf53b0af6c0b9b01587594394394a72dc3266fd2f7d4a8abd97d3,ตัวละคร 023,รูบี้
+115,move/split,e097354d2e523f2ae2482a592346ec9c13e0119c752c8baa036a98de7edac494,ตัวละคร 023,รูบี้
+115,move/split,f41d2e670fcc4207755d66fa154ab09fd5c2f5f95f66818ee7a229359bba06d2,ตัวละคร 023,รูบี้
+116,move/split,e01d44a1575017633a93796dafcd70dd409e8e912cebe0c477ab6011cc988124,ตัวละคร 023,อควา
+116,move/split,233e371322348c4c9b588b8b6f21cb089fffd47da230f475c9ae8385d0b7cb5d,ตัวละคร 023,อควา
+116,move/split,112ab384496d388ed9a8488baddc896e37be19c960c4e72f122f69fab2bd7a06,ตัวละคร 023,อควา
+117,move/split,a73bc68ce140d4412c0f8e1b7b4dd9acf8e7e9c2864e29bfa7f1f5f92989f9e1,ตัวละคร 023,ตัวละคร 057
+120,move/split,060fda6aee34a67a12d87b124806ca312664e96bb05dcaaebaec97a54ee13016,ตัวละคร 023,รูบี้
+120,move/split,4617fc113681fa552fdd59197f2be4dc04fae5d93500abd1ac7f2ee77fb6808c,ตัวละคร 023,รูบี้
+120,move/split,4f5fc9fce319a01d695354f68b6e455e20ce79d2729dd9bb3f69624add94a3da,ตัวละคร 023,รูบี้
+120,move/split,ccc2a6d492541a35c8b6a680bd20864f70a19093b46077e5dd574cfa633de3b9,ตัวละคร 023,รูบี้
+120,move/split,623feaa26a30cc89edee15b5ce2d27ed8fd2d0d61201c91e29b86bec3565bca8,ตัวละคร 023,รูบี้
+120,move/split,ad66e483e5cb1ece9ddb532aa00849b0aa9aeab99d163b78269f8dda2e078982,ตัวละคร 023,รูบี้
+120,move/split,254f9f19ce764278402726f47d0be5900b81c04cecb666caaca775261d1825d5,ตัวละคร 023,รูบี้
+120,move/split,6ead272be30bbeee0fe263d577d29478ede1a44fb6898062ae5a0b16fed7b8c8,ตัวละคร 023,รูบี้
+121,move/split,cdc93426a398cfd0d23bdb4ef0375a3d9131a8e3d9b2216a91b17b86d186e43a,ตัวละคร 023,รูบี้
+122,move/split,60092b05b7a8c1cf17eb8b015a490c61b30aaaaaf4b95aae85851d8eead10b0e,ตัวละคร 023,รูบี้
+123,delete profile,,ตัวละคร 023,(ลบโปรไฟล์ทิ้ง · เคยมี 22 ช่วงผูกอยู่)
+127,delete profile,,ตัวละคร 005,(ลบโปรไฟล์ทิ้ง · เคยมี 5 ช่วงผูกอยู่)
+129,move/split,0ea1f8c401158b66e4e521d21bc915ad67fbea533e36b7ca42862ae8cedaafea,(ยังไม่จัดกลุ่ม),อิจิโกะ
+129,move/split,8afa9a6ba3d995e0c3908d9c3d45be4ad47d57729a387aaafda546b6c077c476,ผู้พูด 017,อิจิโกะ
+129,move/split,93dda3448d594054d6145bcd4f206dc3b6e446bbb9466ef8641a6df8905f6b60,ผู้พูด 017,อิจิโกะ
+129,move/split,00abbeb0667c731a64ba68de87510ea53d0f7cc7d1461d8bb1168922c9e1cf1e,ผู้พูด 017,อิจิโกะ
+130,move/split,73af5cce4157ed2c423be463a243c8d49a7fa8f588aff7e8471adeb46f86e580,ผู้พูด 017,รูบี้
+131,move/split,bf76e35d3eac8d995246dff60b248e6bd53a8d69a6af088172509c2a7460e724,ผู้พูด 017,อควา
+132,move/split,74d994c37419a93e7d5ca20867654c78b0929841868b8d1c31ac47aa605ba8fd,(ยังไม่จัดกลุ่ม),ผู้กำกับรุ่นใหญ่
+132,move/split,20807489120d4b954b59e3c60ca3af9af894cf02850b02ed914be64bf2d5bbe0,ตัวละคร 007,(ยังไม่จัดกลุ่ม)
+132,move/split,14df0dcbec9746266a02ddbf721f78c38195733f43d8ba50be9b14721ac3b091,ตัวละคร 007,(ยังไม่จัดกลุ่ม)
+132,move/split,0e39a3444d23f854c6cfb168d54d3acabe3903612ae586b6691f83bd33a77faf,ตัวละคร 007,(ยังไม่จัดกลุ่ม)
+132,move/split,045d597e714ab60c0948602b0b43fbae02d6a2ad8158c75d00d3087b586950f6,ตัวละคร 007,(ยังไม่จัดกลุ่ม)
+132,move/split,5891be43ca978b1009c393b1e96f65fe87158932f8f67a9af1ac33e85ca4040e,ตัวละคร 007,(ยังไม่จัดกลุ่ม)
+132,move/split,a4ac1a373cf2f9956005152ee51c1109c5a3a7ede39cf8631cc0ee57a70b6347,(ยังไม่จัดกลุ่ม),อาคาเนะ
+132,move/split,308a800c297932b1666ab03b75e902f4fccae06f6f831aada025e28ded2cc9ca,ตัวละคร 007,มินามิ
+132,move/split,c9e9399f3a63f2f6b6dfad2c04d3ba7852369efd15c1036a7c6299253e5d2954,(ยังไม่จัดกลุ่ม),อาคาเนะ
+132,move/split,c7ada08073f55455f8d5bf401ba60908f9c37ad98ff6c36accd53fd953921ce0,ตัวละคร 007,(ยังไม่จัดกลุ่ม)
+132,move/split,05b82534b9ebe77f6b92965f4de1256143ccf8c7683c92f7b569e1c3b014a262,(ยังไม่จัดกลุ่ม),อาคาเนะ
+132,move/split,1a4b9caecc006fe001f65fa0cc1c8a9428d59f1e4b181ac24a4d105e47e0deb2,(ยังไม่จัดกลุ่ม),รูบี้
+132,move/split,0f65bef3fb3cdc5deee1007c5bef6a9c1d047e024c8b2c5e2c8eb827fec12dd9,(ยังไม่จัดกลุ่ม),อควา
+132,move/split,0b77b9217e47a073a413f66fe05f20c09836211d1bb8acd14edd2af99a0a8abb,ตัวละคร 007,(ยังไม่จัดกลุ่ม)
+132,move/split,afc1e056fe90c68d5e7cf913f438dedeb5a9ae7b37e0209ca1c092b37613013b,รูบี้,(ยังไม่จัดกลุ่ม)
+132,move/split,d5ade4285985f8b62bbc4875f4bd6ec53ecb84690068e96bb182039124c4a295,(ยังไม่จัดกลุ่ม),ผู้กำกับรุ่นใหญ่
+132,move/split,a8741bd1a8729454e486aab086d46cdfad6df5f27837662c940b492196b8cf96,(ยังไม่จัดกลุ่ม),รูบี้
+132,move/split,ae9d8e7433476e9fa48b46a49efe56d6e6c14ffbbb03dece48651ed8f09f75ae,(ยังไม่จัดกลุ่ม),ผู้กำกับรุ่นใหญ่
+132,move/split,835d238c462a5b4e72f984566d7b64161e26390ddb95116cb0a5077b75677d00,(ยังไม่จัดกลุ่ม),รูบี้
+132,move/split,fcb407ddd30e0c789cc96497109d7e1fe9702dc1b7ef75f2f29ec2418a65a8f3,(ยังไม่จัดกลุ่ม),ผู้กำกับรุ่นใหญ่
+132,move/split,013d2b6c8dcb3bd7675ac29a500ecca63582e89cc249c4b5ed6e96a0620c5f69,(ยังไม่จัดกลุ่ม),ผู้กำกับรุ่นใหญ่
+132,move/split,7bee4a16b053370c14a0df3bf1f91e58701286ff5ea470b59e7a1ac182165dcb,(ยังไม่จัดกลุ่ม),ผู้กำกับรุ่นใหญ่
+132,move/split,0fe4831fe32fefe114544ba75c7bd7a69743daa24e7d8ed8b063dc77e7eed3a5,(ยังไม่จัดกลุ่ม),ผู้กำกับรุ่นใหญ่
+132,move/split,6ef1231a474c6856508018150232fffa043cabaa5449a1267b966f4e3e7922ab,(ยังไม่จัดกลุ่ม),ผู้กำกับรุ่นใหญ่
+132,move/split,a18b221a3dbd77393fb0b0cd3ef1b8a2bc998f5b51e629ed836f9a4cd3f4d519,(ยังไม่จัดกลุ่ม),ผู้กำกับรุ่นใหญ่
+132,move/split,e21019643e0fca79535403c26aabf66939218b30a4502d4fb67adfa7ab38d693,(ยังไม่จัดกลุ่ม),ผู้กำกับรุ่นใหญ่
+132,move/split,a7b1b059535dccdf56546c446a2ab2b4a3a18a129c9e8b028d566dd9c5008f71,(ยังไม่จัดกลุ่ม),ผู้กำกับรุ่นใหญ่
+132,move/split,8ef3538b02d56c7bfd12629afea9116bbc05792e94b75615e525c4172bc7e697,(ยังไม่จัดกลุ่ม),พิธีกร
+132,move/split,b7c1ccd24267948dc4cf8f4796d103bf7e55408d66bd86ce6929e7450c9fd974,(ยังไม่จัดกลุ่ม),พิธีกร
+132,move/split,11b8bd6d1fc1e118136e125680876b216c0ebd5cc5414772453c4a612bc7f072,(ยังไม่จัดกลุ่ม),ผู้กำกับรุ่นใหญ่
+132,move/split,4cb8f893b91da907852369216c54ab758eebb10518316b8a844336b7b3e4321d,(ยังไม่จัดกลุ่ม),ผู้กำกับรุ่นใหญ่
+132,move/split,44e646346713a46b2d254f9b83a42d30ebeae8296216839e35dca10de533bd1e,(ยังไม่จัดกลุ่ม),ผู้กำกับรุ่นใหญ่
+132,move/split,65a82459fc98ff2e9493216252f063bc3edda0baa79bd32f71ce3a6a98f6c446,(ยังไม่จัดกลุ่ม),โยชิซูมิ
+132,move/split,89378ff544ded23a8ced86474417422f6625f6eff081bfb4ffdb8e611eed0ca0,(ยังไม่จัดกลุ่ม),ผู้กำกับรุ่นใหญ่
+132,move/split,03a59bf27775162ea07c6ef4b3825caae335d5cf29ee381c05a9a86c0809923e,(ยังไม่จัดกลุ่ม),ผู้กำกับรุ่นใหญ่
+132,move/split,b4701a7b08e47210da97badfe9df1b56f5db6c338c1b056fc4e1256b282603bf,(ยังไม่จัดกลุ่ม),ผู้กำกับรุ่นใหญ่
+132,move/split,62ae4559e6d725172402352b7b22e18f817977e19cddc01bb9a1f199ab4f7ecd,(ยังไม่จัดกลุ่ม),ผู้กำกับรุ่นใหญ่
+132,move/split,c52de4c87359d9eb097cf198e9ab7041de5402393fe2b727c02a83efdae7de04,(ยังไม่จัดกลุ่ม),ผู้กำกับรุ่นใหญ่
+132,move/split,eb202911b71a0adb9bc5c8c2172e3a0629de2afda70a6ebb655b8c3e1a109779,(ยังไม่จัดกลุ่ม),โยชิซูมิ
+132,move/split,3a4609c9432a499744c8ee93a4a03bd0b800edaff6a8b3facad15cb13883e05d,(ยังไม่จัดกลุ่ม),ผู้กำกับรุ่นใหญ่
+132,move/split,582553214baf4f0a0c5bbe606c0e9b0cdc5fb1ccad3627358768284c48a4e481,(ยังไม่จัดกลุ่ม),ผู้กำกับรุ่นใหญ่
+132,move/split,23549fbd301345e6b87b01f909c1ee53aeb47289c1315fa14370549d890a62cc,(ยังไม่จัดกลุ่ม),ผู้กำกับรุ่นใหญ่
+132,move/split,6a026066658fc2f35292bb436d3f9582dc0f72916c5cba7bab5151b7d1b74023,(ยังไม่จัดกลุ่ม),ผู้กำกับรุ่นใหญ่
+132,move/split,243e26335ec12039c69bd62b242f2e6b6f74c7f3443eeb4cbb2c9f0d382c2780,(ยังไม่จัดกลุ่ม),ผู้กำกับรุ่นใหญ่
+132,move/split,ca4584daaed5e6e35db67b667b259c07b16a3939195e349bc15d3ac8b16bf19f,(ยังไม่จัดกลุ่ม),ผู้กำกับรุ่นใหญ่
+132,move/split,31af45ded79849436289750dc0efaa127a49271202c4d695edcdf92bcdbc4e49,(ยังไม่จัดกลุ่ม),ผู้กำกับรุ่นใหญ่
+132,move/split,789d24a28ff7e487fc9317ec42be93acf92c48cf98b2bf7adad8e50ff7ca9c35,(ยังไม่จัดกลุ่ม),เนโกะมิมิ
+132,move/split,55e8645eaf7c738354992a651de703034efe2869134dcaa44279ee3d558dcd2a,(ยังไม่จัดกลุ่ม),อาคาเนะ
+132,move/split,535f4b6d1d7599ff57c3b06b2b7b1a49427a646c14e2d8c39bbb9d07eae5797c,(ยังไม่จัดกลุ่ม),อาคาเนะ
+132,move/split,046ed6aed22d2014803436b7095c5a5194d33b1cdb77aa456f936f0c7a543a0c,(ยังไม่จัดกลุ่ม),พิธีกร
+132,move/split,f957ad856e8b9d25e4efb41f7d63ac17d9aebb8327c2a6bd7d9b4539b619a6df,(ยังไม่จัดกลุ่ม),อาคาเนะ
+132,move/split,ddfe75a083b3c03594b5ec9cd53528dc64d611b33823c22504f76b8e3fcb5092,(ยังไม่จัดกลุ่ม),ผู้กำกับรุ่นใหญ่
+132,move/split,b7313719c0ff9ee1b6b9e3be179345b6647f6a9d3f041854b870ed07c57d9e83,(ยังไม่จัดกลุ่ม),ผู้กำกับรุ่นใหญ่
+132,move/split,494136287e4b38806480034dab82cda759ee13277c3d252420bdf2ac61532223,(ยังไม่จัดกลุ่ม),ผู้กำกับรุ่นใหญ่
+132,move/split,57eed83071456875b83ff009404f4e7cdf845edc5ee83705b3261cef12e6546f,(ยังไม่จัดกลุ่ม),ผู้กำกับรุ่นใหญ่
+132,move/split,6c89e34eb92979f075f9da4c9c75f7f4e8511df2ef6e3f6c3fbfe85620ed356e,(ยังไม่จัดกลุ่ม),ผู้กำกับรุ่นใหญ่
+132,move/split,cd0c438f9787ecb640b11650a143ec058040c9d7ab447a901ddacaec2acc23aa,(ยังไม่จัดกลุ่ม),ผู้กำกับรุ่นใหญ่
+132,move/split,2eafe3b4b2de55b5b8cbafa25504de198c27616243c8cfb4e292a210d860d188,(ยังไม่จัดกลุ่ม),ผู้กำกับรุ่นใหญ่
+132,move/split,7381dc720f407b8a22c948d8893bae5c98fee59e472cb0e61d674105024b4c3e,(ยังไม่จัดกลุ่ม),อิจิโกะ
+132,move/split,0aa640471c6c57e1e3cc3daa8084cc44cfca927b53624fa269d7c0f3f2181d58,(ยังไม่จัดกลุ่ม),รูบี้
+132,move/split,0bcd2d5c4a02cd4902704c7b19fa7240b941694a697fee383535673268741bdf,(ยังไม่จัดกลุ่ม),ผู้กำกับรุ่นใหญ่
+132,move/split,4502bbc3ec27b906a65513eeff6143fe0d0fb5bcc4904056ced6a6d05ec57d39,(ยังไม่จัดกลุ่ม),รูบี้
+132,move/split,ab96b5685d2ac2887edcea7acc3ac15f29b1a22c2e206cc98400e728635ba855,(ยังไม่จัดกลุ่ม),อิจิโกะ
+132,move/split,572090bb01be542058bb564480eeb7cdd5ccf46a20d3b64c5231b89a23cd87a2,ผู้พูด 017,อิจิโกะ
+132,move/split,39459b7a2431427ca0d8f8692c14bee4c7729ea092448efc9ac4d4d6bfe53f25,ผู้พูด 017,อิจิโกะ
+132,move/split,73ebcc3db66160d02e352540a847cdf1093e35da82e5b8eb7e4ae6196aeb6fe8,ผู้พูด 017,อิจิโกะ
+132,move/split,282b2e5783359422d78ce1f5fc837abcfdf7c9993450e28411fe44687ffab71d,ผู้พูด 017,อิจิโกะ
+132,move/split,a198caf145b156b810e1b29a7f924257bdceec6a10235333946b96c8e234dd73,ผู้พูด 017,อิจิโกะ
+132,move/split,658cf175546510d175b9f0d3ddba131b4ebf3fdd3490e49ee6c6f65170441076,ผู้พูด 017,อิจิโกะ
+132,move/split,97436877e1e86d4c5abd645db441887354c0904b7f1db22b7f203bfc236adc55,ผู้พูด 017,อิจิโกะ
+132,move/split,ba97afc2ad3f394896b224f8dca3385ed39c7cfa2f5b94487d6459c43e8dfd53,ผู้พูด 017,อิจิโกะ
+132,move/split,ee054037d7120fd6c97a7b47553af7e89bf94249522eeefc8e17acd89fc43d3c,ผู้พูด 017,อิจิโกะ
+132,move/split,c431a7714b55f2731096a05835dccfd3656b31d6b83f52542bb7274b650684d7,ผู้พูด 017,อิจิโกะ
+132,move/split,76d3b90f52a64c8930a9b4751a08a2b096120e22b2409d8b0462c83b52e2516d,ผู้พูด 017,อิจิโกะ
+132,move/split,879432b7b5b318d97b15fd02cc21042c5267ce08c3e9f0add58e1b87756e54ba,ผู้พูด 017,อิจิโกะ
+132,move/split,9300fff293473cb3002406e88de413e2578dea07ec8e6d5d8d10cfd392ad054e,ผู้พูด 017,อิจิโกะ
+132,move/split,c6a65f6749419c3692f3acd4d2c9659f1b5cbcc3b50013aa4bd29af3463e33e7,ผู้พูด 017,อิจิโกะ
+132,move/split,936103c802917cbe6adf60e5dc1bd41adb1499808a8b78935df10dc0286eb0a0,ผู้พูด 017,อิจิโกะ
+132,move/split,adf1079fe4b31c68fc2f802bd034cee3d9f0d2644fab120426cf0119e6b87b5c,ผู้พูด 017,อิจิโกะ
+132,move/split,27bf48c5041f2e44157d5c956a4339b1b4dd7304955088824b9e4911c9d93ace,ผู้พูด 017,อิจิโกะ
+132,move/split,5c9707b84d67f9b8cd3053e5552c8f475385b29f12ccb9032bcb90aadb6fb738,ผู้พูด 017,อิจิโกะ
+132,move/split,5ab6869218f7dc3884fd89fff29409bca4339353cb8e80896da57922b7329949,ผู้พูด 017,อิจิโกะ
+132,move/split,cfcd025db95959bcb4a74196bc4b0e9392d226a0d04e56a0981a4a1cddb20106,ผู้พูด 017,อิจิโกะ
+132,move/split,a98b2343966af55a308f6c05dcc1520bd0bc3c4d6b7e2b5d437255463dc67d98,ผู้พูด 017,อิจิโกะ
+132,move/split,4018cc54b95f27b6c239f4af608d4bfb6bd8666b842cd70635c2863539f0bbdc,ผู้พูด 017,อิจิโกะ
+132,move/split,e5e8c4e03a1b6eeac25168fad1ac4ac2f10e1d57383b4e7fff1c79ef2e00c621,(ยังไม่จัดกลุ่ม),อิจิโกะ
+132,move/split,1076d53f1c2190efdba8ba67ec8b126a4f034afc01bbcf4ba0c279f957b5f7af,(ยังไม่จัดกลุ่ม),โยชิซูมิ
+132,move/split,a4dcfdfff7d393716bf72afc8a0d2e31948b970576fa8fced412637976344041,(ยังไม่จัดกลุ่ม),โยชิซูมิ
+132,move/split,6f5e7680353817464a6b78eb16b3ef4e1508ad62683d38151653a3666a70e6c3,(ยังไม่จัดกลุ่ม),โยชิซูมิ
+132,move/split,32b3e6b4d86434609f1211452fae09b552b38ecec9ae40f733d1fcc50d18b4f8,(ยังไม่จัดกลุ่ม),โยชิซูมิ
+132,move/split,21c84876535a7e64c491599b5d2f782a12eb2fe43c25260a7d8953354ed74b91,(ยังไม่จัดกลุ่ม),โยชิซูมิ
+132,move/split,96e21cc5a53bedb4a0bcb9dcd68a98a57932b3f1363922c981413e8b10a2acba,ผู้พูด 017,อิจิโกะ
+132,move/split,bc708368b745e5dbb5ee0e563ec98bb66fe04a22bcfd2b9df62a10e99f3eefaf,ผู้พูด 018,(ยังไม่จัดกลุ่ม)
+132,move/split,2f5d5a6dbc0a992950789dc116158249d83e6663e11520085c5ab648052e09be,ผู้พูด 018,อิจิโกะ
+132,move/split,c68be20c5b1f582ba1372a03784b09e580d8d42471d4c1b0ec0d438c4f2a9aee,ผู้พูด 018,(ยังไม่จัดกลุ่ม)
+132,move/split,7056e6835e64b755d28ea68a1af6254ec01712db3d15b82949b27f33dee0cf80,(ยังไม่จัดกลุ่ม),อควา
+132,move/split,fafb345708f5763b133f3dd0d62a1298948320597ad3754098ab4b2f9ef4d7fb,ผู้พูด 018,(ยังไม่จัดกลุ่ม)
+132,move/split,d82fdfad621dfb58eb7063bc45d9a27b18780deaff2285767911f2abfc7c2e0d,(ยังไม่จัดกลุ่ม),โยชิซูมิ
+132,move/split,b98cf57f06470ed12e76ba373e41dec42fcf90c349143c03c50d54cc5ef8531e,(ยังไม่จัดกลุ่ม),โยชิซูมิ
+132,move/split,d9e88a0847c97bb46ad14b55213b62511d8b168ec236754baf9953184cde9fbe,(ยังไม่จัดกลุ่ม),โยชิซูมิ
+132,move/split,279e14e92236161186ad4885b90e0c3e12bab817cb17170cf1f787d748294746,อาคาเนะ,(ยังไม่จัดกลุ่ม)
+132,move/split,ba3c1f99cf03fb0194e70cd498e6ac4e96684d3100e5da4dc2a3fd4c14e013e7,อาคาเนะ,(ยังไม่จัดกลุ่ม)
+132,move/split,dcd6596372a9c11ba7f96ff86dba605393e2f371577373f9572585c3bc301c79,อาคาเนะ,(ยังไม่จัดกลุ่ม)
+132,move/split,04f77ee45adfb331f897e16a80e943663803b8b087b37f4ba7293e9f321e9883,โยชิซูมิ,(ยังไม่จัดกลุ่ม)
+132,move/split,7276434dfdf616d9f8d9a096df21679cf4834527aafffa002ebb9ea51f36e188,รูบี้,(ยังไม่จัดกลุ่ม)
+132,move/split,6fc59cd2a0df00a73f92d25e65990160c45ab27276f05e23f993242345feaf52,(ยังไม่จัดกลุ่ม),โยชิซูมิ
+132,move/split,3151e3d1f1be4877440ffe6fac17188f103740b5f87db532d2c1a526c2faf8df,โยชิซูมิ,(ยังไม่จัดกลุ่ม)
+132,move/split,f34d836db858fce73a24f5f656b4f2ab49e3417a9db9dc13fd7b96cd73683638,(ยังไม่จัดกลุ่ม),โยชิซูมิ
+132,move/split,06a3ec319095d1ef1d902898b14231d6bf0d4e291e350e5c87c000b51ffa1cc4,(ยังไม่จัดกลุ่ม),โยชิซูมิ
+132,move/split,4590450b0b6a34a9fca50ce425e27cf45e77c6b473ad08aad37f094cd93c6513,ผู้พูด 018,(ยังไม่จัดกลุ่ม)
+132,move/split,336b7e5bdce9b528b3c16453969730bdc1e7c35985c6775a2e8bfe0f2399d5d8,ผู้พูด 018,อิจิโกะ
+132,move/split,79d5130450d2ebcab771c07f5e9fc33db79e500d7460fec0a5b7193e7053aed9,โยชิซูมิ,(ยังไม่จัดกลุ่ม)
+132,move/split,ec994d60e48da05c02d9ed145f1285947a308e2ad0bc43ec64800c5070b4b324,ผู้พูด 018,ผู้พูด 020
+132,move/split,8ad7292935b78d4af17e1b93ec3b1d2539b66ce274b3257175260b519331374e,ผู้พูด 018,(ยังไม่จัดกลุ่ม)
+132,move/split,112071a4da8cbc6f787ff5b762b3864dd5a617404dd585ad9738b6d1e27f6be9,ผู้พูด 018,อิจิโกะ
+132,move/split,302ff0bc83e83335612a10b3d4c2328d147f52ef07b7c59e3a5d1acbc3c01ac5,ผู้พูด 018,(ยังไม่จัดกลุ่ม)
+132,move/split,5711fb477ecb1352b0cb279ced7c9ca2cffdd99951376d8edfa873b9cf35d3a1,(ยังไม่จัดกลุ่ม),โยชิซูมิ
+132,move/split,2ddea2cc1290d7793561c2199cee7f53db6ae4ebc20a7f434f76409657329317,(ยังไม่จัดกลุ่ม),โยชิซูมิ
+132,move/split,2a3b38abd704b187c203fe175842a5e7a01d1c7fbe1d3dba579078f14421ee41,ผู้พูด 018,อิจิโกะ
+132,move/split,740b1ae197eebcf26c5cdcad8885b99318a1abd3f1918bc33327ce1345a53d6a,ผู้พูด 018,(ยังไม่จัดกลุ่ม)
+132,move/split,9405aa2deb78a90e635543049b5688ec53d822f6a4d7aa5b1efd23d396410aef,ผู้พูด 018,(ยังไม่จัดกลุ่ม)
+132,move/split,1435c70044e8d242ab877edaaead419a7091b5baa3e2cae96e266c4e74669b5a,อาคาเนะ,(ยังไม่จัดกลุ่ม)
+132,move/split,12273310472a78f87269228a8040ed609ad82507862f8ea2d67d27c77e215d07,(ยังไม่จัดกลุ่ม),โยชิซูมิ
+132,move/split,a091d7424489472b06d96ee50109e0b3f530b5e1007d922d6ad117bedea084bd,(ยังไม่จัดกลุ่ม),โยชิซูมิ
+132,move/split,e3ff46d6eaa402af27282478200fad9ebe234a9e57d2823eb17605726ddb677a,อาคาเนะ,(ยังไม่จัดกลุ่ม)
+132,move/split,8b5671dc683b230d05e44bc9bfbf6db71859bfbadd0157de720407d2d0adfce7,(ยังไม่จัดกลุ่ม),โยชิซูมิ
+132,move/split,832ef229428d89e531d19ff33b3fb126bef51f6a12e390ad4b534f9947a6cf5d,ผู้พูด 019,ผู้พูด 021
+132,move/split,3c0720d7bdaa592367f493e2b163379d781906e25edea8cbae15488ae3434b9f,โยชิซูมิ,(ยังไม่จัดกลุ่ม)

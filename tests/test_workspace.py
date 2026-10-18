@@ -95,6 +95,75 @@ class WorkspaceTests(unittest.TestCase):
         self.assertEqual(self.store.rows("SELECT * FROM subtitles")[0]["manual_profile_id"], visual)
         self.assertEqual(self.store.rows("PRAGMA foreign_key_check"), [])
 
+    def test_delete_observations_rejects_locked_and_removes_unlocked(self):
+        self.observation("junk1")
+        self.observation("junk2")
+        visual = self.grouped("face")
+        self.store.confirm(visual)
+        with self.assertRaises(ValueError):
+            self.store.delete_observations(["face"])  # locked/confirmed must not be deletable
+        self.assertEqual(len(self.store.observations()), 3)
+        with self.assertRaises(KeyError):
+            self.store.delete_observations(["does-not-exist"])
+        self.store.delete_observations(["junk1", "junk2"])
+        self.assertEqual([item["id"] for item in self.store.observations()], ["face"])
+        self.assertEqual(self.store.rows("PRAGMA foreign_key_check"), [])
+        with self.assertRaises(ValueError):
+            self.store.delete_observations([])
+
+    def test_link_confirms_both_profiles_so_recluster_cannot_wipe_them(self):
+        from src.workspace.clustering import reset_unlocked_memberships
+        visual = self.grouped("face")
+        voice = self.grouped("v1", kind="voice")
+        self.assertFalse(self.store.profile(visual)["confirmed"])
+        self.assertFalse(self.store.profile(voice)["confirmed"])
+        self.store.link(voice, visual)
+        # ผูกแล้วต้องนับเป็นยืนยันทั้งคู่ทันที ไม่ใช่แค่มี link เฉย ๆ
+        self.assertTrue(self.store.profile(visual)["confirmed"])
+        self.assertTrue(self.store.profile(voice)["confirmed"])
+        for kind in ("visual", "voice"):
+            reset_unlocked_memberships(self.store, kind)
+        # โปรไฟล์ที่ผูกแล้วต้องรอดจากการ recluster เสมอ ไม่ถูกเก็บกวาดทิ้งเหมือนของที่ยังไม่ยืนยัน
+        self.assertEqual(self.store.profile(visual)["name"], "ตัวละคร 001")
+        self.assertEqual(self.store.rows("SELECT * FROM links"), [{"voice_id": voice, "visual_id": visual}])
+
+    def test_reject_observations_excludes_from_future_clustering_and_is_reversible(self):
+        self.grouped("anchor")  # ตัวแทนกลุ่มเดิมให้มีอะไรเทียบ
+        self.observation("bad", features=(1., 0.))  # เหมือน anchor มาก ปกติจะถูกจัดกลุ่มเดียวกัน
+        self.store.reject_observations(["bad"])
+        membership = self.store.rows("SELECT * FROM memberships WHERE observation_id='bad'")[0]
+        self.assertIsNone(membership["profile_id"])
+        self.assertEqual(membership["locked"], 1)
+        self.assertEqual(membership["state"], "rejected")
+        # ผ่าน cluster_observations ไปแล้วต้องยังไม่ถูกจัดกลุ่มใหม่ เพราะล็อกไว้
+        cluster_observations(self.store, "visual", cosine_distances, 0.1)
+        membership = self.store.rows("SELECT * FROM memberships WHERE observation_id='bad'")[0]
+        self.assertIsNone(membership["profile_id"])
+        # ย้อนกลับได้ด้วยคำสั่งย้ายปกติ
+        target = self.store.move(["bad"])
+        self.assertEqual(self.store.rows("SELECT * FROM memberships WHERE observation_id='bad'")[0]["profile_id"], target)
+        with self.assertRaises(KeyError):
+            self.store.reject_observations(["does-not-exist"])
+        with self.assertRaises(ValueError):
+            self.store.reject_observations([])
+
+    def test_unassign_observations_returns_to_pending_for_reclustering(self):
+        self.grouped("anchor", features=(1., 0.))
+        self.grouped("misfiled", features=(1., 0.))  # เหมือน anchor มาก แต่ถูกแยกเป็นกลุ่มตัวเองไปก่อนหน้านี้
+        self.store.unassign_observations(["misfiled"])
+        membership = self.store.rows("SELECT * FROM memberships WHERE observation_id='misfiled'")[0]
+        self.assertIsNone(membership["profile_id"])
+        self.assertEqual(membership["locked"], 0)
+        self.assertEqual(membership["state"], "pending")
+        # ต่างจาก reject: ไม่ล็อก จึงยังถูกพิจารณาใหม่ได้ในรอบ cluster ถัดไป
+        cluster_observations(self.store, "visual", cosine_distances, 0.1)
+        membership = self.store.rows("SELECT * FROM memberships WHERE observation_id='misfiled'")[0]
+        self.assertIsNotNone(membership["profile_id"])
+        with self.assertRaises(KeyError):
+            self.store.unassign_observations(["does-not-exist"])
+        with self.assertRaises(ValueError):
+            self.store.unassign_observations([])
+
     def test_split_locks_and_undo_preserves_later_discoveries(self):
         first = self.grouped("a")
         self.observation("b", start=1200, end=2000)
